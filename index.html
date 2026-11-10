@@ -144,6 +144,10 @@ button:active{transform:scale(.96)}
   <button class="card" style="border-color:#2b3a55" onclick="start('div')">
     <span class="ic">🟦</span><b>Division groups</b>
   </button>
+
+  <button class="card" style="border-color:#1f6f78" onclick="location.href='division.html'">
+    <span class="ic">👀</span><b>Division Lab</b>
+  </button>
 </div>
 
 <div id="chartView" hidden>
@@ -223,7 +227,8 @@ function readMenu(){
         'Practice one table: pick a number. ' +
         'Mix all tables: questions from the ones to the twelves, mixed up. ' +
         'Fact families: three numbers that go together. Find the missing one. ' +
-        'Division groups: tap the groups to count them.');
+        'Division groups: tap the groups to count them. ' +
+        'Division Lab: watch division happen, then solve story problems.');
 }
 
 function stars(){ $('stars').textContent = '⭐'.repeat(got) + '☆'.repeat(Math.max(0, TOTAL - got)); }
