@@ -5,87 +5,98 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Holden's Math</title>
 <style>
-body{font-family:Verdana,Tahoma,sans-serif;background:#fdf6e3;color:#222;text-align:center;margin:0;padding:12px;letter-spacing:.05em}
+/* ---------- Colors ----------
+   Pale blue-gray background. Multiplication = magenta, Division = teal.
+   Text on the bright colors is near-white pale blue. */
+:root{
+  --bg:#E9EFF4; --surface:#FFFFFF; --ink:#1F2D3A; --slate:#526273; --line:#D3DDE6; --stripe:#E4EBF1;
+  --on:#F4F8FB;                       /* text on bright buttons */
+  --mag:#B5179E; --mag-dk:#86106F; --mag-pale:#F8DDF2;
+  --teal:#00838F; --teal-dk:#005D66; --teal-pale:#D5F0F2;
+  --hl:#FFE27A;                       /* yellow "you are here" highlight */
+  --acc:var(--slate); --acc-dk:#3A4756; --acc-pale:var(--stripe);
+}
+body[data-side="mul"]{--acc:var(--mag);--acc-dk:var(--mag-dk);--acc-pale:var(--mag-pale)}
+body[data-side="div"]{--acc:var(--teal);--acc-dk:var(--teal-dk);--acc-pale:var(--teal-pale)}
+
+body{font-family:Verdana,Tahoma,sans-serif;background:var(--bg);color:var(--ink);text-align:center;margin:0;padding:12px;letter-spacing:.05em}
 h1{font-size:28px;margin:6px}
-button{font-family:inherit;font-size:24px;margin:5px;padding:14px 18px;border:0;border-radius:14px;background:#3b7dd8;color:#fff;min-width:64px;cursor:pointer;touch-action:manipulation}
+button{font-family:inherit;font-size:24px;margin:5px;padding:14px 18px;border:0;border-radius:14px;background:var(--acc);color:var(--on);min-width:64px;cursor:pointer;touch-action:manipulation}
 button:active{transform:scale(.96)}
-.big{background:#2e9e5b}.soft{background:#999}
+.big{background:var(--acc-dk)}
+.soft{background:var(--slate)}
 #streak{font-size:22px;margin-bottom:6px}
 #q{font-size:clamp(44px,13vw,60px);margin:10px;font-weight:bold}
-/* Each side has its own color, carried onto every screen behind that door */
-body{--acc:#555}
-body[data-side="mul"]{--acc:#2e9e5b}
-body[data-side="div"]{--acc:#c4620f}
-#modeName{display:inline-block;font-size:20px;color:#fff;background:var(--acc);padding:6px 18px;border-radius:20px;margin:4px 0}
+#modeName{display:inline-block;font-size:20px;color:var(--on);background:var(--acc);padding:6px 18px;border-radius:20px;margin:4px 0}
 
 /* Menus: one column */
 .menu{max-width:520px;margin:0 auto}
-.door{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;min-height:140px;margin:16px 0;font-size:30px;font-weight:bold;line-height:1.25;border-radius:22px;text-align:left}
+.door{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;min-height:140px;margin:16px 0;font-size:30px;font-weight:bold;line-height:1.25;border-radius:22px;text-align:left;color:var(--on)}
 .door .ic{font-size:48px}
-.door.mul{background:#2e9e5b}
-.door.div{background:#c4620f}
-.secthead{display:inline-block;font-size:26px;font-weight:bold;color:#fff;background:var(--acc);padding:8px 20px;border-radius:24px;margin:6px 0}
-.card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:#fff;color:#222;border:3px solid var(--acc);text-align:left}
+.door.mul{background:var(--mag)}
+.door.div{background:var(--teal)}
+.secthead{display:inline-block;font-size:26px;font-weight:bold;color:var(--on);background:var(--acc);padding:8px 20px;border-radius:24px;margin:6px 0}
+.card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:var(--surface);color:var(--ink);border:3px solid var(--acc);text-align:left}
 .card .ic{font-size:38px;flex:none}
 .card b,.sect b{display:block;font-size:24px}
-.card small,.sect small{display:block;font-size:18px;color:#444;margin-top:4px;line-height:1.35;letter-spacing:.03em}
-.sect{background:#fff;border:3px solid var(--acc);border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
-#tables{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-#tables button{margin:0;padding:12px 0;font-size:24px;min-width:0;background:#2e9e5b}
-.say{background:#555;font-size:20px;padding:10px 16px}
+.sect{background:var(--surface);border:3px solid var(--acc);border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
+.picks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.picks button{margin:0;padding:12px 0;font-size:24px;min-width:0}
+.say{background:var(--slate);font-size:20px;padding:10px 16px}
 
-/* Fact family triangle: 3 big numbers close together */
-.tri{position:relative;width:260px;height:210px;margin:6px auto}
-.tri svg{position:absolute;inset:0;width:100%;height:100%}
-.c{position:absolute;width:84px;height:84px;border-radius:50%;background:#fff;border:4px solid #8e5bd8;font-size:34px;font-weight:bold;line-height:76px;box-sizing:border-box}
-.c.top{left:88px;top:0}.c.left{left:0;top:126px}.c.right{right:0;top:126px}
-.c.hole{background:#ffe08a;border-color:#f28c28}
-.c.good{background:#d5f0dd;border-color:#2e9e5b}
-#entry{font-size:52px;min-height:64px;border-bottom:4px solid #3b7dd8;width:180px;margin:0 auto 10px}
+/* Practice screen */
+#entry{font-size:52px;min-height:64px;border-bottom:4px solid var(--acc);width:180px;margin:0 auto 10px}
 #pad{max-width:330px;margin:auto}
 #pad button{width:90px;height:72px;font-size:32px;padding:0}
 #msg{font-size:26px;min-height:70px;margin:8px;line-height:1.5}
 #stars{font-size:32px}
-/* Division: each group is its own box, spaced apart, tap to count */
+
+/* Fact family triangle: 3 big numbers close together */
+.tri{position:relative;width:260px;height:210px;margin:6px auto}
+.tri svg{position:absolute;inset:0;width:100%;height:100%}
+.tri polygon{fill:var(--teal-pale);stroke:var(--teal)}
+.tri .c{position:absolute;width:84px;height:84px;border-radius:50%;background:var(--surface);border:4px solid var(--teal);font-size:34px;font-weight:bold;line-height:76px;box-sizing:border-box}
+.tri .c.top{left:88px;top:0}.tri .c.left{left:0;top:126px}.tri .c.right{right:0;top:126px}
+.tri .c.hole{background:var(--hl);border-color:var(--teal-dk)}
+.tri .c.good{background:var(--teal);border-color:var(--teal-dk);color:var(--on)}
+
+/* Division groups: each group is its own box, spaced apart, tap to count */
 #dots p{font-size:22px;margin:8px;line-height:1.4}
 #groups{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;gap:16px;margin:12px auto}
 @media(min-width:640px){#groups{grid-template-columns:repeat(4,auto)}}
-.grp{position:relative;display:grid;gap:6px;padding:16px 12px 12px 22px;border-radius:14px;border:4px solid transparent;cursor:pointer;justify-content:center;align-content:center;touch-action:manipulation}
-.grp:nth-child(odd){background:#dbe8fb}
-.grp:nth-child(even){background:#fde3c8}
-.grp.done{border-color:#2e9e5b;background:#d5f0dd!important}
-.grp .n{position:absolute;top:-12px;left:-12px;width:30px;height:30px;line-height:30px;border-radius:50%;background:#2e9e5b;color:#fff;font-size:19px;font-weight:bold}
-.dot{width:14px;height:14px;border-radius:50%;background:#2b3a55}
-.hint{color:#555}
+.grp{position:relative;display:grid;gap:6px;padding:16px 12px 12px 22px;border-radius:14px;border:4px solid var(--line);background:var(--surface);cursor:pointer;justify-content:center;align-content:center;touch-action:manipulation}
+.grp.done{border-color:var(--teal);background:var(--teal-pale)}
+.grp .n{position:absolute;top:-12px;left:-12px;width:30px;height:30px;line-height:30px;border-radius:50%;background:var(--teal);color:var(--on);font-size:19px;font-weight:bold}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--ink)}
+.hint{color:var(--slate)}
 
 /* Chart */
-#chartView h2{display:inline-block;font-size:26px;margin:6px;color:#fff;background:var(--acc);padding:6px 20px;border-radius:24px}
+#chartView h2{display:inline-block;font-size:26px;margin:6px;color:var(--on);background:var(--acc);padding:6px 20px;border-radius:24px}
 #fact{font-size:40px;font-weight:bold;min-height:56px;margin:6px}
 #wrap{overflow-x:auto;margin:0 auto;max-width:100%}
 #grid{border-collapse:collapse;margin:0 auto;font-size:clamp(14px,3.6vw,24px)}
-#grid td,#grid th{width:2.1em;height:2.1em;text-align:center;border:1px solid #e4dccb;cursor:pointer;padding:0}
-#grid th{background:#3b7dd8;color:#fff}
-#grid tr:nth-child(odd) td{background:#f4ecd8}
-#grid tr:nth-child(even) td{background:#fffdf7}
-#grid td.sq{background:#cfe8d6!important;font-weight:bold}
-#grid td.on,#grid th.on{background:#ffe08a!important}
-#grid td.hit{background:#f28c28!important;color:#fff;font-weight:bold}
-#grid th.on{color:#222}
+#grid td,#grid th{width:2.1em;height:2.1em;text-align:center;border:1px solid var(--line);cursor:pointer;padding:0}
+#grid th{background:var(--mag);color:var(--on)}
+#grid tr:nth-child(odd) td{background:var(--stripe)}
+#grid tr:nth-child(even) td{background:var(--surface)}
+#grid td.sq{background:var(--mag-pale)!important;font-weight:bold}
+#grid td.on,#grid th.on{background:var(--hl)!important;color:var(--ink)}
+#grid td.hit{background:var(--mag)!important;color:var(--on);font-weight:bold}
 /* fade everything except the chosen row/column, so his eyes have less to sort through */
 #grid.focusing td:not(.on){opacity:.25}
 
-.tabs button{background:#8aa6cc}
-.tabs button.sel{background:#3b7dd8;outline:3px solid #222}
+/* Toggle buttons: outlined = off, filled = on */
+.tabs button,#pickL button{background:var(--surface);color:var(--mag);border:3px solid var(--mag)}
+.tabs button.sel,#pickL button.sel{background:var(--mag);color:var(--on)}
 
 /* Lists: one table at a time, big and spaced out */
-#pickL button{min-width:56px;padding:10px 12px;font-size:22px}
-#pickL button.sel{background:#f28c28}
+#pickL button{min-width:56px;padding:8px 10px;font-size:22px}
 #list{margin:12px auto;border-collapse:collapse;font-size:clamp(28px,7vw,42px)}
 #list td{padding:.1em .22em}
 #list tr{cursor:pointer}
-#list tr:nth-child(odd){background:#f4ecd8}
-#list tr:nth-child(even){background:#fffdf7}
-#list tr.on{background:#ffe08a;outline:4px solid #f28c28}
+#list tr:nth-child(odd){background:var(--stripe)}
+#list tr:nth-child(even){background:var(--surface)}
+#list tr.on{background:var(--hl);outline:4px solid var(--mag)}
 #list td.n{text-align:right}
 #list td.c{text-align:left;font-weight:bold;min-width:2.2em}
 #printArea{display:none}
@@ -106,22 +117,22 @@ body[data-side="div"]{--acc:#c4620f}
   #printArea td:last-child{padding-right:.8em}
   #printArea td.n{text-align:right}
   #printArea td.c{text-align:left;font-weight:bold;min-width:2.2em}
-  #printArea tr:nth-child(odd){background:#f4ecd8}
-  #printArea .box{border:2px solid #3b7dd8;border-radius:10px;padding:4px 6px 6px;break-inside:avoid}
-  #printArea h3{margin:0 0 4px;font-size:22px;background:#3b7dd8;color:#fff;border-radius:6px;padding:2px}
+  #printArea tr:nth-child(odd){background:var(--stripe)}
+  #printArea .box{border:2px solid var(--mag);border-radius:10px;padding:4px 6px 6px;break-inside:avoid}
+  #printArea h3{margin:0 0 4px;font-size:22px;background:var(--mag);color:#fff;border-radius:6px;padding:2px}
   #printArea .pg{display:grid;grid-template-columns:repeat(3,1fr);gap:.22in;break-after:page}
   #printArea .pg:last-child{break-after:auto}
   #printArea .one .box{max-width:5in;margin:0 auto;border:0;padding:0}
   #printArea .one h3{font-size:34px;margin-bottom:6px}
   #printArea .one table{font-size:40px;line-height:1.22}
-  #chartView h2{font-size:28px;margin:0 0 8px}
+  #chartView h2{font-size:28px;margin:0 0 8px;background:var(--mag);color:#fff}
   #grid{font-size:24px}
-  #grid td,#grid th{border:1px solid #999;width:52px;height:50px}
-  #grid td.on,#grid td.hit{color:#222!important;font-weight:normal}
-  #grid tr:nth-child(odd) td{background:#f4ecd8!important}
-  #grid tr:nth-child(even) td{background:#fffdf7!important}
-  #grid tr td.sq{background:#cfe8d6!important;font-weight:bold}
-  #grid th.on{background:#3b7dd8!important;color:#fff}
+  #grid td,#grid th{border:1px solid #9aa8b5;width:52px;height:50px}
+  #grid td.on,#grid td.hit{color:var(--ink)!important;font-weight:normal}
+  #grid tr:nth-child(odd) td{background:var(--stripe)!important}
+  #grid tr:nth-child(even) td{background:#fff!important}
+  #grid tr td.sq{background:var(--mag-pale)!important;font-weight:bold}
+  #grid th.on{background:var(--mag)!important;color:#fff}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -144,10 +155,24 @@ body[data-side="div"]{--acc:#c4620f}
   <button class="card" onclick="openChart()"><span class="ic">📋</span><b>Look at the tables</b></button>
   <div class="sect">
     <b>Practice one table</b>
-    <div id="tables"></div>
+    <div id="tables" class="picks"></div>
   </div>
   <button class="card" onclick="start('mix')"><span class="ic">🔀</span><b>Mix all tables</b></button>
+  <button class="card" onclick="openPrint()"><span class="ic">🖨</span><b>Print study sheets</b></button>
   <button class="soft" onclick="home()">⬅ Home</button>
+</div>
+
+<!-- Paper copies for studying and the fridge -->
+<div id="printMenu" class="menu" hidden>
+  <div class="secthead">🖨 Print study sheets</div>
+  <button class="say" onclick="readMenu('print')" aria-label="Read the choices to me">🔊</button>
+  <button class="card" onclick="printLists('all')"><span class="ic">📄</span><b>All 12 tables</b></button>
+  <div class="sect">
+    <b>One table, big</b>
+    <div id="printPick" class="picks"></div>
+  </div>
+  <button class="card" onclick="printGrid()"><span class="ic">🔢</span><b>Times table grid</b></button>
+  <button class="soft" onclick="goBack()">⬅ Back</button>
 </div>
 
 <!-- Behind the orange door -->
@@ -208,7 +233,10 @@ function load(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } ca
 function store(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
 const misses = load('hm', {});
 
-for (let t = 1; t <= 12; t++) $('tables').innerHTML += `<button onclick="start(${t})">${t}s</button>`;
+for (let t = 1; t <= 12; t++){
+  $('tables').innerHTML += `<button onclick="start(${t})">${t}s</button>`;
+  $('printPick').innerHTML += `<button onclick="printOne(${t})">${t}s</button>`;
+}
 let p = '';
 [1,2,3,4,5,6,7,8,9].forEach(n => p += `<button onclick="key(${n})">${n}</button>`);
 p += `<button class="soft" onclick="back()" aria-label="Erase">⌫</button><button onclick="key(0)">0</button><button class="big" onclick="check()" aria-label="Check">✔</button>`;
@@ -238,7 +266,11 @@ function readMenu(which){
     doors: 'Multiplication practice, the green button. Division practice, the orange button.',
     mul: 'Look at the tables: no quiz, just look and listen. ' +
          'Practice one table: pick a number. ' +
-         'Mix all tables: questions from the ones to the twelves, mixed up.',
+         'Mix all tables: questions from the ones to the twelves, mixed up. ' +
+         'Print study sheets: paper copies to study.',
+    print: 'All 12 tables: two pages, six tables on each. ' +
+           'One table, big: pick a number to print it on its own page. ' +
+           'Times table grid: the whole chart on one page.',
     div: 'Division groups: tap the groups to count them. ' +
          'Fact families: three numbers that go together. Find the missing one. ' +
          'Division Lab: watch division happen, then solve story problems.'
@@ -269,7 +301,7 @@ function next(){
     $('q').textContent = h === 0 ? `${a} × ${b} = ?` : h === 1 ? `${p} ÷ ${b} = ?` : `${p} ÷ ${a} = ?`;
     const c = (pos, val, i) => i === h ? `<div class="c ${pos} hole" id="hole">?</div>` : `<div class="c ${pos}">${val}</div>`;
     $('dots').innerHTML =
-      `<div class="tri"><svg viewBox="0 0 260 210" aria-hidden="true"><polygon points="130,42 42,168 218,168" fill="#efe6fb" stroke="#8e5bd8" stroke-width="6" stroke-linejoin="round"/></svg>` +
+      `<div class="tri"><svg viewBox="0 0 260 210" aria-hidden="true"><polygon points="130,42 42,168 218,168" stroke-width="6" stroke-linejoin="round"/></svg>` +
       c('top', p, 0) + c('left', a, 1) + c('right', b, 2) + `</div>`;
   } else if (mode === 'div'){
     $('q').textContent = `${a*b} ÷ ${a}`;
@@ -377,7 +409,7 @@ function show(){ const n = load('hs', {n:0}).n; $('streak').textContent = '🔥 
 // ---- Screens ----
 let side = '';  // 'mul' (green) or 'div' (orange)
 function showOnly(id){
-  ['doors', 'mulMenu', 'divMenu', 'game', 'chartView'].forEach(x => $(x).hidden = x !== id);
+  ['doors', 'mulMenu', 'divMenu', 'printMenu', 'game', 'chartView'].forEach(x => $(x).hidden = x !== id);
   document.body.dataset.side = id === 'doors' ? '' : side;
   window.scrollTo(0, 0);
 }
@@ -386,6 +418,8 @@ function quiet(){
   stopRead();
   if (window.speechSynthesis) speechSynthesis.cancel();
 }
+function openPrint(){ side = 'mul'; showOnly('printMenu'); }
+function printOne(n){ curT = n; printLists('one'); }
 function openSide(s){ side = s; showOnly(s === 'mul' ? 'mulMenu' : 'divMenu'); }
 function home(){ quiet(); side = ''; showOnly('doors'); show(); }
 function goBack(){ quiet(); openSide(side || 'mul'); show(); }
