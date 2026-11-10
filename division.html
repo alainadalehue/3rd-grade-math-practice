@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Holden's Division Lab</title>
+<script src="voice.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
@@ -146,9 +147,9 @@ applyS();
 /* ---------- read aloud ---------- */
 const canSpeak=('speechSynthesis' in window)&&('SpeechSynthesisUtterance' in window);
 let voice=null;
-function pickVoice(){if(voice)return voice;try{const vs=speechSynthesis.getVoices().filter(v=>/^en[-_]US/i.test(v.lang));voice=vs.find(v=>/Samantha|Google US English|Aria|Jenny|Allison|Ava/i.test(v.name))||vs[0]||null;}catch(e){}return voice;}
+function pickVoice(){if(voice)return voice;voice=window.bestVoice?window.bestVoice():null;return voice;}
 function clearReading(){$$('.w.reading').forEach(w=>w.classList.remove('reading'));}
-function speak(text,el){if(!canSpeak)return;try{speechSynthesis.cancel();clearReading();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=S.rate==='slow'?0.8:0.95;const v=pickVoice();if(v)u.voice=v;
+function speak(text,el){if(!canSpeak)return;try{speechSynthesis.cancel();clearReading();const u=new SpeechSynthesisUtterance(text);u.lang=(pickVoice()||{}).lang||'en-US';u.rate=S.rate==='slow'?0.8:0.95;const v=pickVoice();if(v)u.voice=v;
   if(el){const ws=$$('.w',el);u.onboundary=e=>{if(e.name&&e.name!=='word')return;let hit=null;for(const w of ws){if(+w.dataset.i<=e.charIndex)hit=w;else break;}ws.forEach(w=>w.classList.toggle('reading',w===hit));};}
   u.onend=u.onerror=clearReading;speechSynthesis.speak(u);}catch(e){}}
 const mathWords=t=>t.replace(/÷/g,' divided by ').replace(/×/g,' times ').replace(/−/g,' minus ').replace(/\+/g,' plus ').replace(/=/g,' equals ').replace(/\?/g,' what?').replace(/\s+/g,' ').trim();

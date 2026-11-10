@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Holden's Math</title>
+<script src="voice.js"></script>
 <style>
 /* ---------- Colors ----------
    Dyslexia-friendly: dark navy (not black) text on light, soft (not pure white) backgrounds.
@@ -326,7 +327,8 @@ function speak(t){
   if (!window.speechSynthesis) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(t);
-  u.rate = .85;
+  const v = window.bestVoice && bestVoice(); if (v){ u.voice = v; u.lang = v.lang; }
+  u.rate = .9;
   speechSynthesis.speak(u);
 }
 function say(){
@@ -531,7 +533,8 @@ function step(i){
   if (window.speechSynthesis){
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
-    u.rate = .8;
+    const v = window.bestVoice && bestVoice(); if (v){ u.voice = v; u.lang = v.lang; }
+    u.rate = .85;
     u.onend = () => { readTimer = setTimeout(() => step(i + 1), 400); };
     speechSynthesis.speak(u);
   } else {
