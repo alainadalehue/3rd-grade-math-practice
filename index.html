@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Holden's Math</title>
+<style>
+body{font-family:Verdana,Tahoma,sans-serif;background:#fdf6e3;color:#222;text-align:center;margin:0;padding:12px;letter-spacing:.05em}
+h1{font-size:28px;margin:6px}
+button{font-family:inherit;font-size:24px;margin:5px;padding:14px 18px;border:0;border-radius:14px;background:#3b7dd8;color:#fff;min-width:64px;cursor:pointer;touch-action:manipulation}
+button:active{transform:scale(.96)}
+.big{background:#2e9e5b}.soft{background:#999}
+#streak{font-size:22px;margin-bottom:6px}
+#q{font-size:60px;margin:10px;font-weight:bold}
+#entry{font-size:52px;min-height:64px;border-bottom:4px solid #3b7dd8;width:180px;margin:0 auto 10px}
+#pad{max-width:330px;margin:auto}
+#pad button{width:90px;height:72px;font-size:32px;padding:0}
+#msg{font-size:26px;min-height:70px;margin:8px;line-height:1.5}
+#stars{font-size:32px}
+.dot{display:inline-block;width:12px;height:12px;margin:2px;border-radius:50%;background:#f28c28}
+#dots p{font-size:20px}
+</style>
+</head>
+<body>
+<h1>Holden's Math</h1>
+<div id="streak"></div>
+
+<div id="menu">
+  <p style="font-size:22px">Pick a table:</p>
+  <div id="tables"></div>
+  <button class="big" onclick="start('mix')">Mix it up</button>
+  <button class="big" onclick="start('div')">Division dots</button>
+</div>
+
+<div id="game" hidden>
+  <div id="stars"></div>
+  <div id="q"></div>
+  <button onclick="say()" aria-label="Read it to me">🔊</button>
+  <div id="dots"></div>
+  <div id="entry"></div>
+  <div id="pad"></div>
+  <div id="msg"></div>
+  <button class="soft" onclick="home()">Home</button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const TOTAL = 8;
+let mode, queue = [], cur, entry = '', got = 0, locked = false, timer = null;
+
+function load(k, d){ try { return JSON.parse(localStorage.getItem(k)) || d; } catch(e){ return d; } }
+function store(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+const misses = load('hm', {});
+
+for (let t = 1; t <= 12; t++) $('tables').innerHTML += `<button onclick="start(${t})">${t}s</button>`;
+let p = '';
+[1,2,3,4,5,6,7,8,9].forEach(n => p += `<button onclick="key(${n})">${n}</button>`);
+p += `<button class="soft" onclick="back()" aria-label="Erase">⌫</button><button onclick="key(0)">0</button><button class="big" onclick="check()" aria-label="Check">✔</button>`;
+$('pad').innerHTML = p;
+
+function r(){ return 1 + Math.floor(Math.random() * 12); }
+
+// Half the time in Mix/Division, bring back a fact he has missed before.
+function pickMix(){
+  const k = Object.keys(misses).filter(x => misses[x] > 0);
+  if (k.length && Math.random() < .5) return k[Math.floor(Math.random() * k.length)].split('x').map(Number);
+  return [r(), r()];
+}
+
+function start(m){
+  mode = m; got = 0; queue = [];
+  for (let i = 0; i < TOTAL; i++) queue.push(typeof m === 'number' ? [m, r()] : pickMix());
+  $('menu').hidden = true; $('game').hidden = false;
+  next();
+}
+
+function stars(){ $('stars').textContent = '⭐'.repeat(got) + '☆'.repeat(Math.max(0, TOTAL - got)); }
+
+function next(){
+  locked = false; entry = '';
+  $('entry').textContent = ''; $('msg').textContent = '';
+  stars();
+  if (got >= TOTAL){
+    $('q').textContent = '🎉 You did it!';
+    $('dots').innerHTML = '';
+    $('entry').hidden = true; $('pad').hidden = true;
+    speak('You did it! Great job Holden!');
+    streak();
+    return;
+  }
+  $('entry').hidden = false; $('pad').hidden = false;
+  cur = queue.shift() || pickMix();
+  const [a, b] = cur;
+  $('dots').innerHTML = '';
+  if (mode === 'div'){
+    $('q').textContent = `${a*b} ÷ ${a}`;
+    let h = '';
+    for (let i = 0; i < b; i++) h += '<div>' + '<span class="dot"></span>'.repeat(a) + '</div>';
+    h += `<p>${a*b} dots, ${a} in each row. How many rows?</p>`;
+    $('dots').innerHTML = h;
+  } else {
+    $('q').textContent = `${a} × ${b}`;
+  }
+  say();
+}
+
+function speak(t){
+  if (!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t);
+  u.rate = .85;
+  speechSynthesis.speak(u);
+}
+function say(){
+  if (!cur) return;
+  const [a, b] = cur;
+  speak(mode === 'div' ? `${a*b} divided by ${a}` : `${a} times ${b}`);
+}
+
+function key(n){ if (locked || entry.length >= 3) return; entry += n; $('entry').textContent = entry; }
+function back(){ if (locked) return; entry = entry.slice(0, -1); $('entry').textContent = entry; }
+
+function check(){
+  if (locked || !entry) return;
+  locked = true;
+  const [a, b] = cur;
+  const ans = mode === 'div' ? b : a * b;
+  const id = a + 'x' + b;
+  if (+entry === ans){
+    got++;
+    if (misses[id]) misses[id]--;
+    store('hm', misses);
+    $('msg').textContent = '✅ Yes!';
+    speak('Yes!');
+    timer = setTimeout(next, 900);
+  } else {
+    misses[id] = (misses[id] || 0) + 2;
+    store('hm', misses);
+    const fact = mode === 'div' ? `${a} × ${b} = ${a*b}, so ${a*b} ÷ ${a} = ${b}` : `${a} × ${b} = ${a*b}`;
+    $('msg').textContent = 'Good try! ' + fact;
+    speak(mode === 'div' ? `${a} times ${b} is ${a*b}. So the answer is ${b}` : `${a} times ${b} is ${a*b}`);
+    // Bring the same fact back a couple of questions later so he has to recall it.
+    queue.splice(Math.min(2, queue.length), 0, cur);
+    timer = setTimeout(next, 3500);
+  }
+}
+
+function streak(){
+  const d = new Date().toDateString(), y = new Date(Date.now() - 864e5).toDateString();
+  const s = load('hs', {n:0, d:''});
+  if (s.d !== d){ s.n = s.d === y ? s.n + 1 : 1; s.d = d; store('hs', s); }
+  show();
+}
+function show(){ const n = load('hs', {n:0}).n; $('streak').textContent = '🔥 Streak: ' + n + (n === 1 ? ' day' : ' days'); }
+
+function home(){
+  clearTimeout(timer);
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  $('menu').hidden = false; $('game').hidden = true;
+  show();
+}
+
+// A keyboard works too, for practice on a computer.
+document.addEventListener('keydown', e => {
+  if ($('game').hidden) return;
+  if (/^[0-9]$/.test(e.key)) key(+e.key);
+  else if (e.key === 'Backspace') back();
+  else if (e.key === 'Enter') check();
+  else return;
+  e.preventDefault(); // stop Enter from also "clicking" the last tapped button
+});
+
+show();
+</script>
+</body>
+</html>
