@@ -11,7 +11,27 @@ button{font-family:inherit;font-size:24px;margin:5px;padding:14px 18px;border:0;
 button:active{transform:scale(.96)}
 .big{background:#2e9e5b}.soft{background:#999}
 #streak{font-size:22px;margin-bottom:6px}
-#q{font-size:60px;margin:10px;font-weight:bold}
+#q{font-size:clamp(44px,13vw,60px);margin:10px;font-weight:bold}
+#modeName{font-size:20px;color:#555;margin:2px 0}
+
+/* Home: one column, each choice says what it does */
+#menu{max-width:520px;margin:0 auto}
+.card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:#fff;color:#222;border:3px solid #3b7dd8;text-align:left}
+.card .ic{font-size:38px;flex:none}
+.card b,.sect b{display:block;font-size:24px}
+.card small,.sect small{display:block;font-size:18px;color:#444;margin-top:4px;line-height:1.35;letter-spacing:.03em}
+.sect{background:#fff;border:3px solid #2e9e5b;border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
+#tables{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+#tables button{margin:0;padding:12px 0;font-size:24px;min-width:0;background:#2e9e5b}
+.say{background:#555;font-size:20px;padding:10px 16px}
+
+/* Fact family triangle: 3 big numbers close together */
+.tri{position:relative;width:260px;height:210px;margin:6px auto}
+.tri svg{position:absolute;inset:0;width:100%;height:100%}
+.c{position:absolute;width:84px;height:84px;border-radius:50%;background:#fff;border:4px solid #8e5bd8;font-size:34px;font-weight:bold;line-height:76px;box-sizing:border-box}
+.c.top{left:88px;top:0}.c.left{left:0;top:126px}.c.right{right:0;top:126px}
+.c.hole{background:#ffe08a;border-color:#f28c28}
+.c.good{background:#d5f0dd;border-color:#2e9e5b}
 #entry{font-size:52px;min-height:64px;border-bottom:4px solid #3b7dd8;width:180px;margin:0 auto 10px}
 #pad{max-width:330px;margin:auto}
 #pad button{width:90px;height:72px;font-size:32px;padding:0}
@@ -102,11 +122,28 @@ button:active{transform:scale(.96)}
 <div id="streak"></div>
 
 <div id="menu">
-  <p style="font-size:22px">Pick a table:</p>
-  <div id="tables"></div>
-  <button class="big" onclick="start('mix')">Mix it up</button>
-  <button class="big" onclick="start('div')">Division dots</button>
-  <br><button class="big" style="background:#f28c28" onclick="openChart()">📋 Chart</button>
+  <button class="say" onclick="readMenu()">🔊 Read the choices to me</button>
+
+  <button class="card" style="border-color:#f28c28" onclick="openChart()">
+    <span class="ic">📋</span><span><b>Look at the tables</b><small>No quiz. Just look and listen.</small></span>
+  </button>
+
+  <div class="sect">
+    <b>✖️ Practice one table</b><small>Pick a number. 8 questions from that table.</small>
+    <div id="tables"></div>
+  </div>
+
+  <button class="card" onclick="start('mix')">
+    <span class="ic">🔀</span><span><b>Mix all tables</b><small>Questions from the 1s to the 12s, all mixed up. Ones you missed come back more.</small></span>
+  </button>
+
+  <button class="card" style="border-color:#8e5bd8" onclick="start('fam')">
+    <span class="ic">🔺</span><span><b>Fact families</b><small>3 numbers that go together. Find the missing one with times or divide.</small></span>
+  </button>
+
+  <button class="card" style="border-color:#2b3a55" onclick="start('div')">
+    <span class="ic">🟦</span><span><b>Division groups</b><small>Tap the groups to count them.</small></span>
+  </button>
 </div>
 
 <div id="chartView" hidden>
@@ -137,6 +174,7 @@ button:active{transform:scale(.96)}
 <div id="printArea"></div>
 
 <div id="game" hidden>
+  <div id="modeName"></div>
   <div id="stars"></div>
   <div id="q"></div>
   <button onclick="say()" aria-label="Read it to me">🔊</button>
@@ -174,8 +212,18 @@ function pickMix(){
 function start(m){
   mode = m; got = 0; queue = [];
   for (let i = 0; i < TOTAL; i++) queue.push(typeof m === 'number' ? [m, r()] : pickMix());
+  $('modeName').textContent = typeof m === 'number' ? `The ${m}s` :
+    {mix:'🔀 Mix all tables', fam:'🔺 Fact families', div:'🟦 Division groups'}[m];
   $('menu').hidden = true; $('game').hidden = false;
   next();
+}
+
+function readMenu(){
+  speak('Look at the tables: no quiz, just look and listen. ' +
+        'Practice one table: pick a number. ' +
+        'Mix all tables: questions from the ones to the twelves, mixed up. ' +
+        'Fact families: three numbers that go together. Find the missing one. ' +
+        'Division groups: tap the groups to count them.');
 }
 
 function stars(){ $('stars').textContent = '⭐'.repeat(got) + '☆'.repeat(Math.max(0, TOTAL - got)); }
@@ -192,11 +240,19 @@ function next(){
     streak();
     return;
   }
-  $('entry').hidden = false; $('pad').hidden = false;
+  $('entry').hidden = mode === 'fam'; $('pad').hidden = false;  // in fact families the answer shows inside the ? circle
   cur = queue.shift() || pickMix();
   const [a, b] = cur;
   $('dots').innerHTML = '';
-  if (mode === 'div'){
+  if (mode === 'fam'){
+    if (cur[2] === undefined) cur[2] = Math.floor(Math.random() * 3);  // which corner is hidden
+    const h = cur[2], p = a * b;
+    $('q').textContent = h === 0 ? `${a} × ${b} = ?` : h === 1 ? `${p} ÷ ${b} = ?` : `${p} ÷ ${a} = ?`;
+    const c = (pos, val, i) => i === h ? `<div class="c ${pos} hole" id="hole">?</div>` : `<div class="c ${pos}">${val}</div>`;
+    $('dots').innerHTML =
+      `<div class="tri"><svg viewBox="0 0 260 210" aria-hidden="true"><polygon points="130,42 42,168 218,168" fill="#efe6fb" stroke="#8e5bd8" stroke-width="6" stroke-linejoin="round"/></svg>` +
+      c('top', p, 0) + c('left', a, 1) + c('right', b, 2) + `</div>`;
+  } else if (mode === 'div'){
     $('q').textContent = `${a*b} ÷ ${a}`;
     // Dots sit in a small rectangle inside each box (like dice), so the group size is easy to see.
     const cols = a <= 4 ? a : a <= 8 ? Math.ceil(a / 2) : Math.ceil(a / 3);
@@ -220,8 +276,9 @@ function speak(t){
 }
 function say(){
   if (!cur) return;
-  const [a, b] = cur;
-  speak(mode === 'div' ? `${a*b} divided by ${a}` : `${a} times ${b}`);
+  const [a, b, h] = cur;
+  if (mode === 'fam') speak(h === 0 ? `${a} times ${b}` : h === 1 ? `${a*b} divided by ${b}` : `${a*b} divided by ${a}`);
+  else speak(mode === 'div' ? `${a*b} divided by ${a}` : `${a} times ${b}`);
 }
 
 // Tap-to-count: his finger keeps his place, the number shows up and is read aloud.
@@ -244,15 +301,21 @@ function countAll(){
   });
 }
 
-function key(n){ if (locked || entry.length >= 3) return; entry += n; $('entry').textContent = entry; }
-function back(){ if (locked) return; entry = entry.slice(0, -1); $('entry').textContent = entry; }
+function showEntry(){
+  $('entry').textContent = entry;
+  if (mode === 'fam' && $('hole')) $('hole').textContent = entry || '?';
+}
+function key(n){ if (locked || entry.length >= 3) return; entry += n; showEntry(); }
+function back(){ if (locked) return; entry = entry.slice(0, -1); showEntry(); }
 
 function check(){
   if (locked || !entry) return;
   locked = true;
-  const [a, b] = cur;
-  const ans = mode === 'div' ? b : a * b;
+  const [a, b, h] = cur;
+  const p = a * b;
+  const ans = mode === 'div' ? b : mode === 'fam' ? [p, a, b][h] : p;
   const id = a + 'x' + b;
+  if (mode === 'fam'){ $('hole').textContent = ans; $('hole').classList.add('good'); }
   if (+entry === ans){
     got++;
     if (misses[id]) misses[id]--;
@@ -264,12 +327,23 @@ function check(){
     misses[id] = (misses[id] || 0) + 2;
     store('hm', misses);
     if (mode === 'div') countAll();  // number every group so he can see the answer
-    const fact = mode === 'div' ? `${b} groups of ${a} = ${a*b}, so ${a*b} ÷ ${a} = ${b}` : `${a} × ${b} = ${a*b}`;
+    let fact, said;
+    if (mode === 'div'){
+      fact = `${b} groups of ${a} = ${p}, so ${p} ÷ ${a} = ${b}`;
+      said = `${b} groups of ${a} is ${p}. So the answer is ${b}`;
+    } else if (mode === 'fam' && h > 0){
+      const d = h === 1 ? b : a;  // the number he divided by
+      fact = `${a} × ${b} = ${p}, so ${p} ÷ ${d} = ${ans}`;
+      said = `${a} times ${b} is ${p}. So ${p} divided by ${d} is ${ans}`;
+    } else {
+      fact = `${a} × ${b} = ${p}`;
+      said = `${a} times ${b} is ${p}`;
+    }
     $('msg').textContent = 'Good try! ' + fact;
-    speak(mode === 'div' ? `${b} groups of ${a} is ${a*b}. So the answer is ${b}` : `${a} times ${b} is ${a*b}`);
+    speak(said);
     // Bring the same fact back a couple of questions later so he has to recall it.
     queue.splice(Math.min(2, queue.length), 0, cur);
-    timer = setTimeout(next, mode === "div" ? 5000 : 3500);
+    timer = setTimeout(next, mode === "div" || mode === "fam" ? 5000 : 3500);
   }
 }
 
