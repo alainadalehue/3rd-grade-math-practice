@@ -42,7 +42,12 @@ button:active{transform:scale(.96)}
 .sect{background:var(--surface);border:3px solid var(--acc);border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
 .picks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
 .picks button{margin:0;padding:12px 0;font-size:24px;min-width:0}
-.say{background:var(--slate);font-size:20px;padding:10px 16px}
+/* Speaker buttons: light box so the speaker icon is easy to see */
+.say{background:#DCE6EE;color:var(--ink);border:3px solid #AFC0CF;font-size:28px;padding:6px 18px}
+/* Bright light-green math signs on the magenta and teal */
+.sign{color:#A6F7BF;font-weight:bold;font-family:Arial,Verdana,sans-serif;line-height:1}
+.door .sign{font-size:72px;width:64px;text-align:center}
+.secthead .sign{font-size:32px;margin-right:4px}
 
 /* Practice screen */
 #entry{font-size:52px;min-height:64px;border-bottom:4px solid var(--acc);width:180px;margin:0 auto 10px}
@@ -144,13 +149,13 @@ button:active{transform:scale(.96)}
 <!-- Home: just two doors -->
 <div id="doors" class="menu">
   <button class="say" onclick="readMenu('doors')" aria-label="Read the choices to me">🔊</button>
-  <button class="door mul" onclick="openSide('mul')"><span class="ic">✖️</span>Multiplication<br>Practice</button>
-  <button class="door div" onclick="openSide('div')"><span class="ic">➗</span>Division<br>Practice</button>
+  <button class="door mul" onclick="openSide('mul')"><span class="sign">×</span>Multiplication<br>Practice</button>
+  <button class="door div" onclick="openSide('div')"><span class="sign">÷</span>Division<br>Practice</button>
 </div>
 
 <!-- Behind the green door -->
 <div id="mulMenu" class="menu" hidden>
-  <div class="secthead">✖️ Multiplication Practice</div>
+  <div class="secthead"><span class="sign">×</span> Multiplication Practice</div>
   <button class="say" onclick="readMenu('mul')" aria-label="Read the choices to me">🔊</button>
   <button class="card" onclick="openChart()"><span class="ic">📋</span><b>Look at the tables</b></button>
   <div class="sect">
@@ -177,7 +182,7 @@ button:active{transform:scale(.96)}
 
 <!-- Behind the orange door -->
 <div id="divMenu" class="menu" hidden>
-  <div class="secthead">➗ Division Practice</div>
+  <div class="secthead"><span class="sign">÷</span> Division Practice</div>
   <button class="say" onclick="readMenu('div')" aria-label="Read the choices to me">🔊</button>
   <button class="card" onclick="start('div')"><span class="ic">🟦</span><b>Division groups</b></button>
   <button class="card" onclick="start('fam')"><span class="ic">🔺</span><b>Fact families</b></button>
@@ -216,7 +221,7 @@ button:active{transform:scale(.96)}
   <div id="modeName"></div>
   <div id="stars"></div>
   <div id="q"></div>
-  <button onclick="say()" aria-label="Read it to me">🔊</button>
+  <button class="say" onclick="say()" aria-label="Read it to me">🔊</button>
   <div id="dots"></div>
   <div id="entry"></div>
   <div id="pad"></div>
