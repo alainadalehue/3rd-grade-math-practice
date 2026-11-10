@@ -162,7 +162,7 @@ button:active{transform:scale(.96)}
     <b>Practice one table</b>
     <div id="tables" class="picks"></div>
   </div>
-  <button class="card" onclick="start('mix')"><span class="ic">🔀</span><b>Mix all tables</b></button>
+  <button class="card" onclick="start('mix')"><span class="ic">🔀</span><b>Practice all tables, mixed</b></button>
   <button class="card" onclick="openPrint()"><span class="ic">🖨</span><b>Print study sheets</b></button>
   <button class="soft" onclick="home()">⬅ Home</button>
 </div>
@@ -260,7 +260,7 @@ function start(m){
   mode = m; got = 0; queue = [];
   for (let i = 0; i < TOTAL; i++) queue.push(typeof m === 'number' ? [m, r()] : pickMix());
   $('modeName').textContent = typeof m === 'number' ? `The ${m}s` :
-    {mix:'🔀 Mix all tables', fam:'🔺 Fact families', div:'🟦 Division groups'}[m];
+    {mix:'🔀 All tables, mixed', fam:'🔺 Fact families', div:'🟦 Division groups'}[m];
   side = (m === 'div' || m === 'fam') ? 'div' : 'mul';
   showOnly('game');
   next();
@@ -271,7 +271,7 @@ function readMenu(which){
     doors: 'Multiplication practice, the green button. Division practice, the orange button.',
     mul: 'Look at the tables: no quiz, just look and listen. ' +
          'Practice one table: pick a number. ' +
-         'Mix all tables: questions from the ones to the twelves, mixed up. ' +
+         'Practice all tables, mixed: questions from the ones to the twelves, mixed up. ' +
          'Print study sheets: paper copies to study.',
     print: 'All 12 tables: two pages, six tables on each. ' +
            'One table, big: pick a number to print it on its own page. ' +
