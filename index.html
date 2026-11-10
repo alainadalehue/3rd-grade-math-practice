@@ -33,11 +33,49 @@ button:active{transform:scale(.96)}
 #grid td.on,#grid th.on{background:#ffe08a!important}
 #grid td.hit{background:#f28c28!important;color:#fff;font-weight:bold}
 #grid th.on{color:#222}
+/* fade everything except the chosen row/column, so his eyes have less to sort through */
+#grid.focusing td:not(.on){opacity:.25}
+
+.tabs button{background:#8aa6cc}
+.tabs button.sel{background:#3b7dd8;outline:3px solid #222}
+
+/* Lists: one table at a time, big and spaced out */
+#pickL button{min-width:56px;padding:10px 12px;font-size:22px}
+#pickL button.sel{background:#f28c28}
+#list{margin:12px auto;border-collapse:collapse;font-size:clamp(28px,7vw,42px)}
+#list td{padding:.1em .22em}
+#list tr{cursor:pointer}
+#list tr:nth-child(odd){background:#f4ecd8}
+#list tr:nth-child(even){background:#fffdf7}
+#list tr.on{background:#ffe08a;outline:4px solid #f28c28}
+#list td.n{text-align:right}
+#list td.c{text-align:left;font-weight:bold;min-width:2.2em}
+#printArea{display:none}
+
 @media print{
   @page{size:landscape;margin:.4in}
   body{background:#fff;padding:0}
   h1,#streak,#menu,#game,.noprint{display:none!important}
-  #chartView{display:block!important}
+  body[data-print="grid"] #chartView{display:block!important}
+  body[data-print="grid"] #listsPane{display:none!important}
+  body[data-print="grid"] #gridPane{display:block!important}
+  body[data-print="lists"] #chartView{display:none!important}
+  body[data-print="lists"] #printArea{display:block!important}
+  #grid td{opacity:1!important}
+  #printArea table{margin:0 auto;border-collapse:collapse;font-size:20px;line-height:1.2}
+  #printArea td{padding:0 4px}
+  #printArea td:first-child{padding-left:.8em}
+  #printArea td:last-child{padding-right:.8em}
+  #printArea td.n{text-align:right}
+  #printArea td.c{text-align:left;font-weight:bold;min-width:2.2em}
+  #printArea tr:nth-child(odd){background:#f4ecd8}
+  #printArea .box{border:2px solid #3b7dd8;border-radius:10px;padding:4px 6px 6px;break-inside:avoid}
+  #printArea h3{margin:0 0 4px;font-size:22px;background:#3b7dd8;color:#fff;border-radius:6px;padding:2px}
+  #printArea .pg{display:grid;grid-template-columns:repeat(3,1fr);gap:.22in;break-after:page}
+  #printArea .pg:last-child{break-after:auto}
+  #printArea .one .box{max-width:5in;margin:0 auto;border:0;padding:0}
+  #printArea .one h3{font-size:34px;margin-bottom:6px}
+  #printArea .one table{font-size:40px;line-height:1.22}
   #chartView h2{font-size:28px;margin:0 0 8px}
   #grid{font-size:24px}
   #grid td,#grid th{border:1px solid #999;width:52px;height:50px}
@@ -63,14 +101,31 @@ button:active{transform:scale(.96)}
 </div>
 
 <div id="chartView" hidden>
-  <h2>Multiplication Chart</h2>
-  <div id="fact" class="noprint">Tap a number</div>
-  <div id="wrap"><table id="grid"></table></div>
-  <div class="noprint">
-    <button class="big" onclick="window.print()">🖨 Print</button>
-    <button class="soft" onclick="home()">Home</button>
+  <h2>Times Tables</h2>
+  <div class="tabs noprint">
+    <button id="tabL" onclick="tab('lists')">Lists</button>
+    <button id="tabG" onclick="tab('grid')">Grid</button>
   </div>
+
+  <div id="listsPane">
+    <div id="pickL" class="noprint"></div>
+    <table id="list"></table>
+    <div class="noprint">
+      <button class="big" id="readBtn" onclick="readAll()">▶ Read it to me</button><br>
+      <button onclick="printLists('one')">🖨 Print this table</button>
+      <button onclick="printLists('all')">🖨 Print all 12</button>
+    </div>
+  </div>
+
+  <div id="gridPane" hidden>
+    <div id="fact" class="noprint">Tap a number</div>
+    <div id="wrap"><table id="grid"></table></div>
+    <div class="noprint"><button class="big" onclick="printGrid()">🖨 Print</button></div>
+  </div>
+
+  <div class="noprint"><button class="soft" onclick="home()">Home</button></div>
 </div>
+<div id="printArea"></div>
 
 <div id="game" hidden>
   <div id="stars"></div>
@@ -195,6 +250,7 @@ function show(){ const n = load('hs', {n:0}).n; $('streak').textContent = '🔥 
 
 function home(){
   clearTimeout(timer);
+  stopRead();
   if (window.speechSynthesis) speechSynthesis.cancel();
   $('menu').hidden = false; $('game').hidden = true; $('chartView').hidden = true;
   show();
@@ -223,6 +279,7 @@ let selR = 0, selC = 0;
 })();
 
 function paint(){
+  $('grid').classList.toggle('focusing', !!(selR || selC));
   document.querySelectorAll('#grid td, #grid th').forEach(el => {
     const r = +el.dataset.r || 0, c = +el.dataset.c || 0;
     el.classList.toggle('hit', r === selR && c === selC && r > 0 && c > 0);
@@ -238,9 +295,103 @@ function paint(){
 
 function openChart(){
   selR = 0; selC = 0;
+  $('grid').classList.remove('focusing');
   document.querySelectorAll('#grid .on, #grid .hit').forEach(el => el.classList.remove('on', 'hit'));
   $('fact').textContent = 'Tap a number';
   $('menu').hidden = true; $('game').hidden = true; $('chartView').hidden = false;
+  tab('lists');
+  showList(curT);
+}
+
+function tab(t){
+  stopRead();
+  $('listsPane').hidden = t !== 'lists';
+  $('gridPane').hidden = t !== 'grid';
+  $('tabL').classList.toggle('sel', t === 'lists');
+  $('tabG').classList.toggle('sel', t === 'grid');
+}
+
+// ---- Lists: one table at a time, like the old printed pages ----
+let curT = 1, reading = false, readTimer = null;
+for (let n = 1; n <= 12; n++) $('pickL').innerHTML += `<button data-n="${n}" onclick="showList(${n})">${n}s</button>`;
+
+function rows(n){
+  let h = '';
+  for (let i = 1; i <= 12; i++)
+    h += `<tr data-i="${i}"><td class="n">${n}</td><td>×</td><td class="n">${i}</td><td>=</td><td class="c">${n*i}</td></tr>`;
+  return h;
+}
+
+function showList(n){
+  stopRead();
+  curT = n;
+  $('list').innerHTML = rows(n);
+  document.querySelectorAll('#pickL button').forEach(b => b.classList.toggle('sel', +b.dataset.n === n));
+}
+
+function setLine(i){
+  document.querySelectorAll('#list tr').forEach(tr => tr.classList.toggle('on', +tr.dataset.i === i));
+}
+
+$('list').addEventListener('click', e => {
+  const tr = e.target.closest('tr'); if (!tr) return;
+  stopRead();
+  const i = +tr.dataset.i;
+  setLine(i);
+  speak(`${curT} times ${i} is ${curT*i}`);
+});
+
+// Reads the table top to bottom, moving the yellow line along with the voice.
+function readAll(){
+  if (reading){ stopRead(); return; }
+  reading = true;
+  $('readBtn').textContent = '■ Stop';
+  step(1);
+}
+function step(i){
+  if (!reading) return;
+  if (i > 12){ stopRead(); return; }
+  setLine(i);
+  const t = `${curT} times ${i} is ${curT*i}`;
+  if (window.speechSynthesis){
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(t);
+    u.rate = .8;
+    u.onend = () => { readTimer = setTimeout(() => step(i + 1), 400); };
+    speechSynthesis.speak(u);
+  } else {
+    readTimer = setTimeout(() => step(i + 1), 2200);
+  }
+}
+function stopRead(){
+  if (!reading) return;
+  reading = false;
+  clearTimeout(readTimer);
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  $('readBtn').textContent = '▶ Read it to me';
+}
+
+// ---- Printing ----
+function box(n){ return `<div class="box"><h3>The ${n}s</h3><table>${rows(n)}</table></div>`; }
+function printLists(which){
+  stopRead();
+  let h = '';
+  if (which === 'one') h = `<div class="one">${box(curT)}</div>`;
+  else {
+    // 6 tables per page (2 pages) keeps the print big enough to track
+    for (let pg = 0; pg < 2; pg++){
+      h += '<div class="pg">';
+      for (let n = pg*6 + 1; n <= pg*6 + 6; n++) h += box(n);
+      h += '</div>';
+    }
+  }
+  $('printArea').innerHTML = h;
+  document.body.dataset.print = 'lists';
+  window.print();
+}
+function printGrid(){
+  document.body.dataset.print = 'grid';
+  window.print();
 }
 
 // A keyboard works too, for practice on a computer.
