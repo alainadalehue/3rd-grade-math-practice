@@ -17,8 +17,17 @@ button:active{transform:scale(.96)}
 #pad button{width:90px;height:72px;font-size:32px;padding:0}
 #msg{font-size:26px;min-height:70px;margin:8px;line-height:1.5}
 #stars{font-size:32px}
-.dot{display:inline-block;width:12px;height:12px;margin:2px;border-radius:50%;background:#f28c28}
-#dots p{font-size:20px}
+/* Division: each group is its own box, spaced apart, tap to count */
+#dots p{font-size:22px;margin:8px;line-height:1.4}
+#groups{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;gap:16px;margin:12px auto}
+@media(min-width:640px){#groups{grid-template-columns:repeat(4,auto)}}
+.grp{position:relative;display:grid;gap:6px;padding:16px 12px 12px 22px;border-radius:14px;border:4px solid transparent;cursor:pointer;justify-content:center;align-content:center;touch-action:manipulation}
+.grp:nth-child(odd){background:#dbe8fb}
+.grp:nth-child(even){background:#fde3c8}
+.grp.done{border-color:#2e9e5b;background:#d5f0dd!important}
+.grp .n{position:absolute;top:-12px;left:-12px;width:30px;height:30px;line-height:30px;border-radius:50%;background:#2e9e5b;color:#fff;font-size:19px;font-weight:bold}
+.dot{width:14px;height:14px;border-radius:50%;background:#2b3a55}
+.hint{color:#555}
 
 /* Chart */
 #chartView h2{font-size:26px;margin:6px}
@@ -189,10 +198,13 @@ function next(){
   $('dots').innerHTML = '';
   if (mode === 'div'){
     $('q').textContent = `${a*b} ÷ ${a}`;
-    let h = '';
-    for (let i = 0; i < b; i++) h += '<div>' + '<span class="dot"></span>'.repeat(a) + '</div>';
-    h += `<p>${a*b} dots, ${a} in each row. How many rows?</p>`;
-    $('dots').innerHTML = h;
+    // Dots sit in a small rectangle inside each box (like dice), so the group size is easy to see.
+    const cols = a <= 4 ? a : a <= 8 ? Math.ceil(a / 2) : Math.ceil(a / 3);
+    let g = '';
+    for (let i = 0; i < b; i++)
+      g += `<div class="grp" style="grid-template-columns:repeat(${cols},14px)">` + '<span class="dot"></span>'.repeat(a) + '</div>';
+    counted = 0;
+    $('dots').innerHTML = `<p>${a*b} dots in groups of ${a}.<br>How many groups?</p><div id="groups">${g}</div><p class="hint">👆 Tap each group to count</p>`;
   } else {
     $('q').textContent = `${a} × ${b}`;
   }
@@ -210,6 +222,26 @@ function say(){
   if (!cur) return;
   const [a, b] = cur;
   speak(mode === 'div' ? `${a*b} divided by ${a}` : `${a} times ${b}`);
+}
+
+// Tap-to-count: his finger keeps his place, the number shows up and is read aloud.
+let counted = 0;
+$('dots').addEventListener('click', e => {
+  const box = e.target.closest('.grp');
+  if (!box || box.classList.contains('done') || locked) return;
+  counted++;
+  box.classList.add('done');
+  box.insertAdjacentHTML('beforeend', `<span class="n">${counted}</span>`);
+  speak(String(counted));
+});
+function countAll(){
+  counted = 0;
+  document.querySelectorAll('.grp').forEach(box => {
+    counted++;
+    box.classList.add('done');
+    const n = box.querySelector('.n');
+    if (n) n.textContent = counted; else box.insertAdjacentHTML('beforeend', `<span class="n">${counted}</span>`);
+  });
 }
 
 function key(n){ if (locked || entry.length >= 3) return; entry += n; $('entry').textContent = entry; }
@@ -231,12 +263,13 @@ function check(){
   } else {
     misses[id] = (misses[id] || 0) + 2;
     store('hm', misses);
-    const fact = mode === 'div' ? `${a} × ${b} = ${a*b}, so ${a*b} ÷ ${a} = ${b}` : `${a} × ${b} = ${a*b}`;
+    if (mode === 'div') countAll();  // number every group so he can see the answer
+    const fact = mode === 'div' ? `${b} groups of ${a} = ${a*b}, so ${a*b} ÷ ${a} = ${b}` : `${a} × ${b} = ${a*b}`;
     $('msg').textContent = 'Good try! ' + fact;
-    speak(mode === 'div' ? `${a} times ${b} is ${a*b}. So the answer is ${b}` : `${a} times ${b} is ${a*b}`);
+    speak(mode === 'div' ? `${b} groups of ${a} is ${a*b}. So the answer is ${b}` : `${a} times ${b} is ${a*b}`);
     // Bring the same fact back a couple of questions later so he has to recall it.
     queue.splice(Math.min(2, queue.length), 0, cur);
-    timer = setTimeout(next, 3500);
+    timer = setTimeout(next, mode === "div" ? 5000 : 3500);
   }
 }
 
