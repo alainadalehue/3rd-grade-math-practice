@@ -6,93 +6,94 @@
 <title>Holden's Math</title>
 <style>
 /* ---------- Colors ----------
-   Pale blue-gray background. Multiplication = magenta, Division = teal.
-   Text on the bright colors is near-white pale blue. */
+   Dyslexia-friendly: dark navy (not black) text on light, soft (not pure white) backgrounds.
+   Every button is a bright pastel with dark text. No dark blocks anywhere.
+   Multiplication = pastel magenta, Division = pastel teal. */
 :root{
-  --bg:#E9EFF4; --surface:#FFFFFF; --ink:#1F2D3A; --slate:#526273; --line:#D3DDE6; --stripe:#E4EBF1;
-  --on:#F4F8FB;                       /* text on bright buttons */
-  --mag:#B5179E; --mag-dk:#86106F; --mag-pale:#F8DDF2;
-  --teal:#00838F; --teal-dk:#005D66; --teal-pale:#D5F0F2;
-  --hl:#FFE27A;                       /* yellow "you are here" highlight */
-  --acc:var(--slate); --acc-dk:#3A4756; --acc-pale:var(--stripe);
+  --bg:#E9EFF4; --surface:#FBFCF8; --ink:#1E2B4A; --line:#C9D5E0; --stripe:#E6EDF3;
+  --mag:#F6B8E6; --mag-line:#C25CA6; --mag-pale:#FBE3F4;
+  --teal:#A6E6E0; --teal-line:#2F9C94; --teal-pale:#DDF4F2;
+  --go:#BDEFC8; --go-line:#4FAE68;          /* check key, correct answers */
+  --calm:#DCE4EC; --calm-line:#A9BACB;      /* back, erase, speaker */
+  --hl:#FFE89A;                             /* yellow "you are here" highlight */
+  --acc:var(--calm); --acc-line:var(--calm-line); --acc-pale:var(--stripe);
 }
-body[data-side="mul"]{--acc:var(--mag);--acc-dk:var(--mag-dk);--acc-pale:var(--mag-pale)}
-body[data-side="div"]{--acc:var(--teal);--acc-dk:var(--teal-dk);--acc-pale:var(--teal-pale)}
+body[data-side="mul"]{--acc:var(--mag);--acc-line:var(--mag-line);--acc-pale:var(--mag-pale)}
+body[data-side="div"]{--acc:var(--teal);--acc-line:var(--teal-line);--acc-pale:var(--teal-pale)}
 
 body{font-family:Verdana,Tahoma,sans-serif;background:var(--bg);color:var(--ink);text-align:center;margin:0;padding:12px;letter-spacing:.05em}
 h1{font-size:28px;margin:6px}
-button{font-family:inherit;font-size:24px;margin:5px;padding:14px 18px;border:0;border-radius:14px;background:var(--acc);color:var(--on);min-width:64px;cursor:pointer;touch-action:manipulation}
+button{font-family:inherit;font-size:24px;margin:5px;padding:14px 18px;border:3px solid var(--acc-line);border-radius:14px;background:var(--acc);color:var(--ink);font-weight:bold;min-width:64px;cursor:pointer;touch-action:manipulation}
 button:active{transform:scale(.96)}
-.big{background:var(--acc-dk)}
-.soft{background:var(--slate)}
+.big{background:var(--go);border-color:var(--go-line)}
+.soft{background:var(--calm);border-color:var(--calm-line)}
 #streak{font-size:22px;margin-bottom:6px}
 #q{font-size:clamp(44px,13vw,60px);margin:10px;font-weight:bold}
-#modeName{display:inline-block;font-size:20px;color:var(--on);background:var(--acc);padding:6px 18px;border-radius:20px;margin:4px 0}
+#modeName{display:inline-block;font-size:20px;color:var(--ink);background:var(--acc);border:3px solid var(--acc-line);padding:4px 18px;border-radius:20px;margin:4px 0}
 
 /* Menus: one column */
 .menu{max-width:520px;margin:0 auto}
-.door{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;min-height:140px;margin:16px 0;font-size:30px;font-weight:bold;line-height:1.25;border-radius:22px;text-align:left;color:var(--on)}
-.door .ic{font-size:48px}
-.door.mul{background:var(--mag)}
-.door.div{background:var(--teal)}
-.secthead{display:inline-block;font-size:26px;font-weight:bold;color:var(--on);background:var(--acc);padding:8px 20px;border-radius:24px;margin:6px 0}
-.card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:var(--surface);color:var(--ink);border:3px solid var(--acc);text-align:left}
+.door{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;min-height:140px;margin:16px 0;font-size:30px;line-height:1.25;border-radius:22px;text-align:left;color:var(--ink)}
+.door.mul{background:var(--mag);border:4px solid var(--mag-line)}
+.door.div{background:var(--teal);border:4px solid var(--teal-line)}
+.secthead{display:inline-block;font-size:26px;font-weight:bold;color:var(--ink);background:var(--acc);border:3px solid var(--acc-line);padding:6px 20px;border-radius:24px;margin:6px 0}
+.card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:var(--surface);color:var(--ink);border:3px solid var(--acc-line);text-align:left;font-weight:normal}
 .card .ic{font-size:38px;flex:none}
 .card b,.sect b{display:block;font-size:24px}
-.sect{background:var(--surface);border:3px solid var(--acc);border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
+.sect{background:var(--surface);border:3px solid var(--acc-line);border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
 .picks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
 .picks button{margin:0;padding:12px 0;font-size:24px;min-width:0}
 /* Speaker buttons: light box so the speaker icon is easy to see */
-.say{background:#DCE6EE;color:var(--ink);border:3px solid #AFC0CF;font-size:28px;padding:6px 18px}
-/* Bright light-green math signs on the magenta and teal */
-.sign{color:#A6F7BF;font-weight:bold;font-family:Arial,Verdana,sans-serif;line-height:1}
+.say{background:var(--calm);border-color:var(--calm-line);font-size:28px;padding:6px 18px}
+/* Math signs on the big buttons */
+.sign{color:var(--ink);font-weight:bold;font-family:Arial,Verdana,sans-serif;line-height:1}
 .door .sign{font-size:72px;width:64px;text-align:center}
-.secthead .sign{font-size:32px;margin-right:4px}
+.secthead .sign{font-size:30px;margin-right:4px}
 
 /* Practice screen */
-#entry{font-size:52px;min-height:64px;border-bottom:4px solid var(--acc);width:180px;margin:0 auto 10px}
+#entry{font-size:52px;min-height:64px;border-bottom:4px solid var(--acc-line);width:180px;margin:0 auto 10px}
 #pad{max-width:330px;margin:auto}
-#pad button{width:90px;height:72px;font-size:32px;padding:0}
+#pad button{width:90px;height:72px;font-size:34px;padding:0}
 #msg{font-size:26px;min-height:70px;margin:8px;line-height:1.5}
 #stars{font-size:32px}
 
 /* Fact family triangle: 3 big numbers close together */
 .tri{position:relative;width:260px;height:210px;margin:6px auto}
 .tri svg{position:absolute;inset:0;width:100%;height:100%}
-.tri polygon{fill:var(--teal-pale);stroke:var(--teal)}
-.tri .c{position:absolute;width:84px;height:84px;border-radius:50%;background:var(--surface);border:4px solid var(--teal);font-size:34px;font-weight:bold;line-height:76px;box-sizing:border-box}
+.tri polygon{fill:var(--teal-pale);stroke:var(--teal-line)}
+.tri .c{position:absolute;width:84px;height:84px;border-radius:50%;background:var(--surface);border:4px solid var(--teal-line);font-size:34px;font-weight:bold;line-height:76px;box-sizing:border-box}
 .tri .c.top{left:88px;top:0}.tri .c.left{left:0;top:126px}.tri .c.right{right:0;top:126px}
-.tri .c.hole{background:var(--hl);border-color:var(--teal-dk)}
-.tri .c.good{background:var(--teal);border-color:var(--teal-dk);color:var(--on)}
+.tri .c.hole{background:var(--hl);border-color:var(--teal-line)}
+.tri .c.good{background:var(--go);border-color:var(--go-line)}
 
 /* Division groups: each group is its own box, spaced apart, tap to count */
 #dots p{font-size:22px;margin:8px;line-height:1.4}
 #groups{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;gap:16px;margin:12px auto}
 @media(min-width:640px){#groups{grid-template-columns:repeat(4,auto)}}
 .grp{position:relative;display:grid;gap:6px;padding:16px 12px 12px 22px;border-radius:14px;border:4px solid var(--line);background:var(--surface);cursor:pointer;justify-content:center;align-content:center;touch-action:manipulation}
-.grp.done{border-color:var(--teal);background:var(--teal-pale)}
-.grp .n{position:absolute;top:-12px;left:-12px;width:30px;height:30px;line-height:30px;border-radius:50%;background:var(--teal);color:var(--on);font-size:19px;font-weight:bold}
+.grp.done{border-color:var(--teal-line);background:var(--teal-pale)}
+.grp .n{position:absolute;top:-12px;left:-12px;width:30px;height:30px;line-height:26px;border-radius:50%;background:var(--teal);border:2px solid var(--teal-line);color:var(--ink);font-size:19px;font-weight:bold;box-sizing:border-box}
 .dot{width:14px;height:14px;border-radius:50%;background:var(--ink)}
-.hint{color:var(--slate)}
+.hint{color:var(--ink)}
 
 /* Chart */
-#chartView h2{display:inline-block;font-size:26px;margin:6px;color:var(--on);background:var(--acc);padding:6px 20px;border-radius:24px}
+#chartView h2{display:inline-block;font-size:26px;margin:6px;color:var(--ink);background:var(--acc);border:3px solid var(--acc-line);padding:4px 20px;border-radius:24px}
 #fact{font-size:40px;font-weight:bold;min-height:56px;margin:6px}
 #wrap{overflow-x:auto;margin:0 auto;max-width:100%}
 #grid{border-collapse:collapse;margin:0 auto;font-size:clamp(14px,3.6vw,24px)}
 #grid td,#grid th{width:2.1em;height:2.1em;text-align:center;border:1px solid var(--line);cursor:pointer;padding:0}
-#grid th{background:var(--mag);color:var(--on)}
+#grid th{background:var(--mag);color:var(--ink)}
 #grid tr:nth-child(odd) td{background:var(--stripe)}
 #grid tr:nth-child(even) td{background:var(--surface)}
 #grid td.sq{background:var(--mag-pale)!important;font-weight:bold}
 #grid td.on,#grid th.on{background:var(--hl)!important;color:var(--ink)}
-#grid td.hit{background:var(--mag)!important;color:var(--on);font-weight:bold}
+#grid td.hit{background:var(--mag)!important;color:var(--ink);font-weight:bold;outline:3px solid var(--mag-line)}
 /* fade everything except the chosen row/column, so his eyes have less to sort through */
 #grid.focusing td:not(.on){opacity:.25}
 
-/* Toggle buttons: outlined = off, filled = on */
-.tabs button,#pickL button{background:var(--surface);color:var(--mag);border:3px solid var(--mag)}
-.tabs button.sel,#pickL button.sel{background:var(--mag);color:var(--on)}
+/* Toggle buttons: outlined = off, filled pastel = on */
+.tabs button,#pickL button{background:var(--surface);color:var(--ink);border:3px solid var(--line);font-weight:normal}
+.tabs button.sel,#pickL button.sel{background:var(--mag);border-color:var(--mag-line);font-weight:bold}
 
 /* Lists: one table at a time, big and spaced out */
 #pickL button{min-width:56px;padding:8px 10px;font-size:22px}
@@ -101,7 +102,7 @@ button:active{transform:scale(.96)}
 #list tr{cursor:pointer}
 #list tr:nth-child(odd){background:var(--stripe)}
 #list tr:nth-child(even){background:var(--surface)}
-#list tr.on{background:var(--hl);outline:4px solid var(--mag)}
+#list tr.on{background:var(--hl);outline:4px solid var(--mag-line)}
 #list td.n{text-align:right}
 #list td.c{text-align:left;font-weight:bold;min-width:2.2em}
 #printArea{display:none}
@@ -123,21 +124,22 @@ button:active{transform:scale(.96)}
   #printArea td.n{text-align:right}
   #printArea td.c{text-align:left;font-weight:bold;min-width:2.2em}
   #printArea tr:nth-child(odd){background:var(--stripe)}
-  #printArea .box{border:2px solid var(--mag);border-radius:10px;padding:4px 6px 6px;break-inside:avoid}
-  #printArea h3{margin:0 0 4px;font-size:22px;background:var(--mag);color:#fff;border-radius:6px;padding:2px}
+  #printArea .box{border:2px solid var(--mag-line);border-radius:10px;padding:4px 6px 6px;break-inside:avoid}
+  #printArea h3{margin:0 0 4px;font-size:22px;background:var(--mag);color:var(--ink);border-radius:6px;padding:2px}
   #printArea .pg{display:grid;grid-template-columns:repeat(3,1fr);gap:.22in;break-after:page}
   #printArea .pg:last-child{break-after:auto}
   #printArea .one .box{max-width:5in;margin:0 auto;border:0;padding:0}
   #printArea .one h3{font-size:34px;margin-bottom:6px}
   #printArea .one table{font-size:40px;line-height:1.22}
-  #chartView h2{font-size:28px;margin:0 0 8px;background:var(--mag);color:#fff}
+  #chartView h2{font-size:28px;margin:0 0 8px;background:var(--mag);color:var(--ink)}
   #grid{font-size:24px}
   #grid td,#grid th{border:1px solid #9aa8b5;width:52px;height:50px}
   #grid td.on,#grid td.hit{color:var(--ink)!important;font-weight:normal}
   #grid tr:nth-child(odd) td{background:var(--stripe)!important}
   #grid tr:nth-child(even) td{background:#fff!important}
   #grid tr td.sq{background:var(--mag-pale)!important;font-weight:bold}
-  #grid th.on{background:var(--mag)!important;color:#fff}
+  #grid th.on{background:var(--mag)!important;color:var(--ink)}
+  #grid td.hit{outline:0}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
