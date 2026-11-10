@@ -122,27 +122,27 @@ button:active{transform:scale(.96)}
 <div id="streak"></div>
 
 <div id="menu">
-  <button class="say" onclick="readMenu()">🔊 Read the choices to me</button>
+  <button class="say" onclick="readMenu()" aria-label="Read the choices to me">🔊</button>
 
   <button class="card" style="border-color:#f28c28" onclick="openChart()">
-    <span class="ic">📋</span><span><b>Look at the tables</b><small>No quiz. Just look and listen.</small></span>
+    <span class="ic">📋</span><b>Look at the tables</b>
   </button>
 
   <div class="sect">
-    <b>✖️ Practice one table</b><small>Pick a number. 8 questions from that table.</small>
+    <b>✖️ Practice one table</b>
     <div id="tables"></div>
   </div>
 
   <button class="card" onclick="start('mix')">
-    <span class="ic">🔀</span><span><b>Mix all tables</b><small>Questions from the 1s to the 12s, all mixed up. Ones you missed come back more.</small></span>
+    <span class="ic">🔀</span><b>Mix all tables</b>
   </button>
 
   <button class="card" style="border-color:#8e5bd8" onclick="start('fam')">
-    <span class="ic">🔺</span><span><b>Fact families</b><small>3 numbers that go together. Find the missing one with times or divide.</small></span>
+    <span class="ic">🔺</span><b>Fact families</b>
   </button>
 
   <button class="card" style="border-color:#2b3a55" onclick="start('div')">
-    <span class="ic">🟦</span><span><b>Division groups</b><small>Tap the groups to count them.</small></span>
+    <span class="ic">🟦</span><b>Division groups</b>
   </button>
 </div>
 
