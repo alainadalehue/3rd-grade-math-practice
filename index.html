@@ -12,15 +12,24 @@ button:active{transform:scale(.96)}
 .big{background:#2e9e5b}.soft{background:#999}
 #streak{font-size:22px;margin-bottom:6px}
 #q{font-size:clamp(44px,13vw,60px);margin:10px;font-weight:bold}
-#modeName{font-size:20px;color:#555;margin:2px 0}
+/* Each side has its own color, carried onto every screen behind that door */
+body{--acc:#555}
+body[data-side="mul"]{--acc:#2e9e5b}
+body[data-side="div"]{--acc:#c4620f}
+#modeName{display:inline-block;font-size:20px;color:#fff;background:var(--acc);padding:6px 18px;border-radius:20px;margin:4px 0}
 
-/* Home: one column, each choice says what it does */
-#menu{max-width:520px;margin:0 auto}
-.card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:#fff;color:#222;border:3px solid #3b7dd8;text-align:left}
+/* Menus: one column */
+.menu{max-width:520px;margin:0 auto}
+.door{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;min-height:140px;margin:16px 0;font-size:30px;font-weight:bold;line-height:1.25;border-radius:22px;text-align:left}
+.door .ic{font-size:48px}
+.door.mul{background:#2e9e5b}
+.door.div{background:#c4620f}
+.secthead{display:inline-block;font-size:26px;font-weight:bold;color:#fff;background:var(--acc);padding:8px 20px;border-radius:24px;margin:6px 0}
+.card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:#fff;color:#222;border:3px solid var(--acc);text-align:left}
 .card .ic{font-size:38px;flex:none}
 .card b,.sect b{display:block;font-size:24px}
 .card small,.sect small{display:block;font-size:18px;color:#444;margin-top:4px;line-height:1.35;letter-spacing:.03em}
-.sect{background:#fff;border:3px solid #2e9e5b;border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
+.sect{background:#fff;border:3px solid var(--acc);border-radius:14px;padding:14px 16px;margin:10px 0;text-align:left}
 #tables{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
 #tables button{margin:0;padding:12px 0;font-size:24px;min-width:0;background:#2e9e5b}
 .say{background:#555;font-size:20px;padding:10px 16px}
@@ -50,7 +59,7 @@ button:active{transform:scale(.96)}
 .hint{color:#555}
 
 /* Chart */
-#chartView h2{font-size:26px;margin:6px}
+#chartView h2{display:inline-block;font-size:26px;margin:6px;color:#fff;background:var(--acc);padding:6px 20px;border-radius:24px}
 #fact{font-size:40px;font-weight:bold;min-height:56px;margin:6px}
 #wrap{overflow-x:auto;margin:0 auto;max-width:100%}
 #grid{border-collapse:collapse;margin:0 auto;font-size:clamp(14px,3.6vw,24px)}
@@ -84,7 +93,7 @@ button:active{transform:scale(.96)}
 @media print{
   @page{size:landscape;margin:.4in}
   body{background:#fff;padding:0}
-  h1,#streak,#menu,#game,.noprint{display:none!important}
+  h1,#streak,.menu,#game,.noprint{display:none!important}
   body[data-print="grid"] #chartView{display:block!important}
   body[data-print="grid"] #listsPane{display:none!important}
   body[data-print="grid"] #gridPane{display:block!important}
@@ -121,33 +130,34 @@ button:active{transform:scale(.96)}
 <h1>Holden's Math</h1>
 <div id="streak"></div>
 
-<div id="menu">
-  <button class="say" onclick="readMenu()" aria-label="Read the choices to me">🔊</button>
+<!-- Home: just two doors -->
+<div id="doors" class="menu">
+  <button class="say" onclick="readMenu('doors')" aria-label="Read the choices to me">🔊</button>
+  <button class="door mul" onclick="openSide('mul')"><span class="ic">✖️</span>Multiplication<br>Practice</button>
+  <button class="door div" onclick="openSide('div')"><span class="ic">➗</span>Division<br>Practice</button>
+</div>
 
-  <button class="card" style="border-color:#f28c28" onclick="openChart()">
-    <span class="ic">📋</span><b>Look at the tables</b>
-  </button>
-
+<!-- Behind the green door -->
+<div id="mulMenu" class="menu" hidden>
+  <div class="secthead">✖️ Multiplication Practice</div>
+  <button class="say" onclick="readMenu('mul')" aria-label="Read the choices to me">🔊</button>
+  <button class="card" onclick="openChart()"><span class="ic">📋</span><b>Look at the tables</b></button>
   <div class="sect">
-    <b>✖️ Practice one table</b>
+    <b>Practice one table</b>
     <div id="tables"></div>
   </div>
+  <button class="card" onclick="start('mix')"><span class="ic">🔀</span><b>Mix all tables</b></button>
+  <button class="soft" onclick="home()">⬅ Home</button>
+</div>
 
-  <button class="card" onclick="start('mix')">
-    <span class="ic">🔀</span><b>Mix all tables</b>
-  </button>
-
-  <button class="card" style="border-color:#8e5bd8" onclick="start('fam')">
-    <span class="ic">🔺</span><b>Fact families</b>
-  </button>
-
-  <button class="card" style="border-color:#2b3a55" onclick="start('div')">
-    <span class="ic">🟦</span><b>Division groups</b>
-  </button>
-
-  <button class="card" style="border-color:#1f6f78" onclick="location.href='division.html'">
-    <span class="ic">👀</span><b>Division Lab</b>
-  </button>
+<!-- Behind the orange door -->
+<div id="divMenu" class="menu" hidden>
+  <div class="secthead">➗ Division Practice</div>
+  <button class="say" onclick="readMenu('div')" aria-label="Read the choices to me">🔊</button>
+  <button class="card" onclick="start('div')"><span class="ic">🟦</span><b>Division groups</b></button>
+  <button class="card" onclick="start('fam')"><span class="ic">🔺</span><b>Fact families</b></button>
+  <button class="card" onclick="location.href='division.html'"><span class="ic">👀</span><b>Division Lab</b></button>
+  <button class="soft" onclick="home()">⬅ Home</button>
 </div>
 
 <div id="chartView" hidden>
@@ -173,7 +183,7 @@ button:active{transform:scale(.96)}
     <div class="noprint"><button class="big" onclick="printGrid()">🖨 Print</button></div>
   </div>
 
-  <div class="noprint"><button class="soft" onclick="home()">Home</button></div>
+  <div class="noprint"><button class="soft" onclick="goBack()">⬅ Back</button></div>
 </div>
 <div id="printArea"></div>
 
@@ -186,7 +196,7 @@ button:active{transform:scale(.96)}
   <div id="entry"></div>
   <div id="pad"></div>
   <div id="msg"></div>
-  <button class="soft" onclick="home()">Home</button>
+  <button class="soft" onclick="goBack()">⬅ Back</button>
 </div>
 
 <script>
@@ -218,17 +228,21 @@ function start(m){
   for (let i = 0; i < TOTAL; i++) queue.push(typeof m === 'number' ? [m, r()] : pickMix());
   $('modeName').textContent = typeof m === 'number' ? `The ${m}s` :
     {mix:'🔀 Mix all tables', fam:'🔺 Fact families', div:'🟦 Division groups'}[m];
-  $('menu').hidden = true; $('game').hidden = false;
+  side = (m === 'div' || m === 'fam') ? 'div' : 'mul';
+  showOnly('game');
   next();
 }
 
-function readMenu(){
-  speak('Look at the tables: no quiz, just look and listen. ' +
-        'Practice one table: pick a number. ' +
-        'Mix all tables: questions from the ones to the twelves, mixed up. ' +
-        'Fact families: three numbers that go together. Find the missing one. ' +
-        'Division groups: tap the groups to count them. ' +
-        'Division Lab: watch division happen, then solve story problems.');
+function readMenu(which){
+  speak({
+    doors: 'Multiplication practice, the green button. Division practice, the orange button.',
+    mul: 'Look at the tables: no quiz, just look and listen. ' +
+         'Practice one table: pick a number. ' +
+         'Mix all tables: questions from the ones to the twelves, mixed up.',
+    div: 'Division groups: tap the groups to count them. ' +
+         'Fact families: three numbers that go together. Find the missing one. ' +
+         'Division Lab: watch division happen, then solve story problems.'
+  }[which]);
 }
 
 function stars(){ $('stars').textContent = '⭐'.repeat(got) + '☆'.repeat(Math.max(0, TOTAL - got)); }
@@ -360,13 +374,23 @@ function streak(){
 }
 function show(){ const n = load('hs', {n:0}).n; $('streak').textContent = '🔥 Streak: ' + n + (n === 1 ? ' day' : ' days'); }
 
-function home(){
+// ---- Screens ----
+let side = '';  // 'mul' (green) or 'div' (orange)
+function showOnly(id){
+  ['doors', 'mulMenu', 'divMenu', 'game', 'chartView'].forEach(x => $(x).hidden = x !== id);
+  document.body.dataset.side = id === 'doors' ? '' : side;
+  window.scrollTo(0, 0);
+}
+function quiet(){
   clearTimeout(timer);
   stopRead();
   if (window.speechSynthesis) speechSynthesis.cancel();
-  $('menu').hidden = false; $('game').hidden = true; $('chartView').hidden = true;
-  show();
 }
+function openSide(s){ side = s; showOnly(s === 'mul' ? 'mulMenu' : 'divMenu'); }
+function home(){ quiet(); side = ''; showOnly('doors'); show(); }
+function goBack(){ quiet(); openSide(side || 'mul'); show(); }
+// division.html links back with #div so he lands on the orange side
+if (location.hash === '#div') openSide('div');
 
 // ---- Chart: tap a row and a column to light them up ----
 let selR = 0, selC = 0;
@@ -410,7 +434,8 @@ function openChart(){
   $('grid').classList.remove('focusing');
   document.querySelectorAll('#grid .on, #grid .hit').forEach(el => el.classList.remove('on', 'hit'));
   $('fact').textContent = 'Tap a number';
-  $('menu').hidden = true; $('game').hidden = true; $('chartView').hidden = false;
+  side = 'mul';
+  showOnly('chartView');
   tab('lists');
   showList(curT);
 }
