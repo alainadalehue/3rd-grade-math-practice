@@ -19,6 +19,35 @@ button:active{transform:scale(.96)}
 #stars{font-size:32px}
 .dot{display:inline-block;width:12px;height:12px;margin:2px;border-radius:50%;background:#f28c28}
 #dots p{font-size:20px}
+
+/* Chart */
+#chartView h2{font-size:26px;margin:6px}
+#fact{font-size:40px;font-weight:bold;min-height:56px;margin:6px}
+#wrap{overflow-x:auto;margin:0 auto;max-width:100%}
+#grid{border-collapse:collapse;margin:0 auto;font-size:clamp(14px,3.6vw,24px)}
+#grid td,#grid th{width:2.1em;height:2.1em;text-align:center;border:1px solid #e4dccb;cursor:pointer;padding:0}
+#grid th{background:#3b7dd8;color:#fff}
+#grid tr:nth-child(odd) td{background:#f4ecd8}
+#grid tr:nth-child(even) td{background:#fffdf7}
+#grid td.sq{background:#cfe8d6!important;font-weight:bold}
+#grid td.on,#grid th.on{background:#ffe08a!important}
+#grid td.hit{background:#f28c28!important;color:#fff;font-weight:bold}
+#grid th.on{color:#222}
+@media print{
+  @page{size:landscape;margin:.4in}
+  body{background:#fff;padding:0}
+  h1,#streak,#menu,#game,.noprint{display:none!important}
+  #chartView{display:block!important}
+  #chartView h2{font-size:28px;margin:0 0 8px}
+  #grid{font-size:24px}
+  #grid td,#grid th{border:1px solid #999;width:52px;height:50px}
+  #grid td.on,#grid td.hit{color:#222!important;font-weight:normal}
+  #grid tr:nth-child(odd) td{background:#f4ecd8!important}
+  #grid tr:nth-child(even) td{background:#fffdf7!important}
+  #grid tr td.sq{background:#cfe8d6!important;font-weight:bold}
+  #grid th.on{background:#3b7dd8!important;color:#fff}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -30,6 +59,17 @@ button:active{transform:scale(.96)}
   <div id="tables"></div>
   <button class="big" onclick="start('mix')">Mix it up</button>
   <button class="big" onclick="start('div')">Division dots</button>
+  <br><button class="big" style="background:#f28c28" onclick="openChart()">📋 Chart</button>
+</div>
+
+<div id="chartView" hidden>
+  <h2>Multiplication Chart</h2>
+  <div id="fact" class="noprint">Tap a number</div>
+  <div id="wrap"><table id="grid"></table></div>
+  <div class="noprint">
+    <button class="big" onclick="window.print()">🖨 Print</button>
+    <button class="soft" onclick="home()">Home</button>
+  </div>
 </div>
 
 <div id="game" hidden>
@@ -156,8 +196,51 @@ function show(){ const n = load('hs', {n:0}).n; $('streak').textContent = '🔥 
 function home(){
   clearTimeout(timer);
   if (window.speechSynthesis) speechSynthesis.cancel();
-  $('menu').hidden = false; $('game').hidden = true;
+  $('menu').hidden = false; $('game').hidden = true; $('chartView').hidden = true;
   show();
+}
+
+// ---- Chart: tap a row and a column to light them up ----
+let selR = 0, selC = 0;
+(function buildChart(){
+  let h = '<tr><th>×</th>';
+  for (let c = 1; c <= 12; c++) h += `<th data-c="${c}">${c}</th>`;
+  h += '</tr>';
+  for (let r = 1; r <= 12; r++){
+    h += `<tr><th data-r="${r}">${r}</th>`;
+    for (let c = 1; c <= 12; c++) h += `<td data-r="${r}" data-c="${c}"${r === c ? ' class="sq"' : ''}>${r*c}</td>`;
+    h += '</tr>';
+  }
+  $('grid').innerHTML = h;
+  $('grid').addEventListener('click', e => {
+    const el = e.target.closest('td,th'); if (!el) return;
+    const r = +el.dataset.r || 0, c = +el.dataset.c || 0;
+    if (r && c){ selR = r; selC = c; }       // tapped an answer
+    else if (r){ selR = r; }                  // tapped a row number
+    else if (c){ selC = c; }                  // tapped a column number
+    paint();
+  });
+})();
+
+function paint(){
+  document.querySelectorAll('#grid td, #grid th').forEach(el => {
+    const r = +el.dataset.r || 0, c = +el.dataset.c || 0;
+    el.classList.toggle('hit', r === selR && c === selC && r > 0 && c > 0);
+    el.classList.toggle('on', (selR && r === selR) || (selC && c === selC));
+  });
+  if (selR && selC){
+    $('fact').textContent = `${selR} × ${selC} = ${selR*selC}`;
+    speak(`${selR} times ${selC} is ${selR*selC}`);
+  } else {
+    $('fact').textContent = selR ? `The ${selR}s` : `The ${selC}s`;
+  }
+}
+
+function openChart(){
+  selR = 0; selC = 0;
+  document.querySelectorAll('#grid .on, #grid .hit').forEach(el => el.classList.remove('on', 'hit'));
+  $('fact').textContent = 'Tap a number';
+  $('menu').hidden = true; $('game').hidden = true; $('chartView').hidden = false;
 }
 
 // A keyboard works too, for practice on a computer.
