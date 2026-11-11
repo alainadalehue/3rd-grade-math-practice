@@ -261,12 +261,13 @@ button:active{transform:scale(.96)}
   <div id="modeName"></div>
   <div id="stars"></div>
   <div id="q"></div>
-  <button class="say" onclick="say()" aria-label="Read it to me">🔊</button>
+  <button class="say" id="sayBtn" onclick="say(true)" aria-label="Read it to me">🔊</button>
   <div id="dots"></div>
   <div id="entry"></div>
   <div id="pad"></div>
   <div id="msg"></div>
   <button class="soft" onclick="goBack()">⬅ Back</button>
+  <button class="soft" id="soundBtn" onclick="toggleSound()"></button>
 </div>
 
 <script>
@@ -315,11 +316,11 @@ function next(){
   if (got >= TOTAL){
     $('q').textContent = '🎉 You did it!';
     $('dots').innerHTML = '';
-    $('entry').hidden = true; $('pad').hidden = true;
+    $('entry').hidden = true; $('pad').hidden = true; $('sayBtn').hidden = true;
     speak('You did it! Great job!');
     return;
   }
-  $('entry').hidden = mode === 'fam'; $('pad').hidden = false;  // in fact families the answer shows inside the ? circle
+  $('entry').hidden = mode === 'fam'; $('pad').hidden = false; $('sayBtn').hidden = false;  // in fact families the answer shows inside the ? circle
   cur = queue.shift() || pickMix();
   const [a, b] = cur;
   $('dots').innerHTML = '';
@@ -346,20 +347,29 @@ function next(){
   say();
 }
 
-function speak(t){
+// Sound on/off for the practice screens, remembered on this device.
+let muted = load('mute', false);
+function showSound(){ $('soundBtn').textContent = muted ? '🔇 Sound off' : '🔊 Sound on'; }
+function toggleSound(){
+  muted = !muted; store('mute', muted); showSound();
+  if (muted && window.speechSynthesis) speechSynthesis.cancel();
+}
+function speak(t, force){
   if (!window.speechSynthesis) return;
+  if (muted && !force && !$('game').hidden) return;   // muted: no automatic reading during practice
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(t);
   const v = window.bestVoice && bestVoice(); if (v){ u.voice = v; u.lang = v.lang; }
   u.rate = .9;
   speechSynthesis.speak(u);
 }
-function say(){
+function say(force){
   if (!cur) return;
   const [a, b, h] = cur;
-  if (mode === 'fam') speak(h === 0 ? `${a} times ${b}` : h === 1 ? `${a*b} divided by ${b}` : `${a*b} divided by ${a}`);
-  else speak(mode === 'div' ? `${a*b} divided by ${a}` : `${a} times ${b}`);
+  if (mode === 'fam') speak(h === 0 ? `${a} times ${b}` : h === 1 ? `${a*b} divided by ${b}` : `${a*b} divided by ${a}`, force);
+  else speak(mode === 'div' ? `${a*b} divided by ${a}` : `${a} times ${b}`, force);
 }
+showSound();
 
 // Tap-to-count: his finger keeps his place, the number shows up and is read aloud.
 let counted = 0;
