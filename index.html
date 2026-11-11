@@ -59,7 +59,8 @@ button:active{transform:scale(.96)}
 #entry{font-size:52px;min-height:64px;border-bottom:4px solid var(--acc-line);width:180px;margin:0 auto 10px}
 #pad{max-width:330px;margin:auto}
 #pad button{width:90px;height:72px;font-size:34px;padding:0}
-#msg{font-size:26px;min-height:70px;margin:8px;line-height:1.5}
+#msg{font-size:26px;font-weight:bold;margin:0 8px 10px;line-height:1.4}   /* feedback sits right under his answer */
+#msg:empty{display:none}
 #stars{font-size:32px}
 #sayRow{display:flex;justify-content:center;align-items:center;gap:10px}
 #soundBtn{font-size:18px;padding:10px 14px}
@@ -272,8 +273,8 @@ button:active{transform:scale(.96)}
   </div>
   <div id="dots"></div>
   <div id="entry"></div>
-  <div id="pad"></div>
   <div id="msg"></div>
+  <div id="pad"></div>
 
 </div>
 
@@ -417,9 +418,14 @@ function check(){
     got++;
     if (misses[id]) misses[id]--;
     store('hm', misses);
-    $('msg').textContent = '✅ Yes!';
-    speak('Yes!');
-    timer = setTimeout(next, 900);
+    // repeat the whole fact so it sticks: "Yes! 5 × 4 = 20"
+    const shown = mode === 'div' ? `${p} ÷ ${a} = ${b}`
+                : mode === 'fam' ? [`${a} × ${b} = ${p}`, `${p} ÷ ${b} = ${a}`, `${p} ÷ ${a} = ${b}`][h]
+                : `${a} × ${b} = ${p}`;
+    const heard = shown.replace('×', 'times').replace('÷', 'divided by').replace('=', 'is');
+    $('msg').textContent = '✅ Yes! ' + shown;
+    speak('Yes! ' + heard);
+    timer = setTimeout(next, 2200);
   } else {
     misses[id] = (misses[id] || 0) + 2;
     store('hm', misses);
