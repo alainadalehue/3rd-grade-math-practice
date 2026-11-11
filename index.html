@@ -17,7 +17,7 @@
   --go:#BDEFC8; --go-line:#4FAE68;          /* check key, correct answers */
   --calm:#DCE4EC; --calm-line:#A9BACB;      /* back, erase, speaker */
   --hl:#FFE89A;                             /* yellow "you are here" highlight */
-  --pstripe:#CFE3F7; --psq:#F6C6E8;        /* brighter stripes and squares for paper, which prints lighter */
+  --pstripe:#CFE3F7; --psq:#F6C6E8; --chunk:#5A6E8C;  /* chunk lines: soft navy, not black */        /* brighter stripes and squares for paper, which prints lighter */
   --acc:var(--calm); --acc-line:var(--calm-line); --acc-pale:var(--stripe);
 }
 body[data-side="mul"]{--acc:var(--mag);--acc-line:var(--mag-line);--acc-pale:var(--mag-pale)}
@@ -110,7 +110,6 @@ button:active{transform:scale(.96)}
 #printArea{display:none}
 
 @media print{
-  @page{size:landscape;margin:.4in}
   body{background:#fff;padding:0}
   h1,#streak,.menu,#game,.noprint{display:none!important}
   body[data-print="grid"] #chartView{display:block!important}
@@ -119,32 +118,65 @@ button:active{transform:scale(.96)}
   body[data-print="lists"] #chartView{display:none!important}
   body[data-print="lists"] #printArea{display:block!important}
   #grid td{opacity:1!important}
-  #printArea table{margin:0 auto;border-collapse:collapse;font-size:20px;line-height:1.2}
-  #printArea td{padding:0 4px}
-  #printArea td:first-child{padding-left:.8em}
-  #printArea td:last-child{padding-right:.8em}
+  /* --- Printed tables: big text, roomy rows, thick "chunk" lines after rows 3, 6 and 9 --- */
+  #printArea table{margin:0 auto;border-collapse:collapse;font-size:34px;line-height:1.55;letter-spacing:.03em}
+  #printArea td{padding:0 4px;border-bottom:2px solid #9AABBF}   /* a line under every row */
+  #printArea td:first-child{padding-left:.4em}
+  #printArea td:last-child{padding-right:.4em}
   #printArea td.n{text-align:right}
   #printArea td.c{text-align:left;font-weight:bold;min-width:2.2em}
   #printArea tr:nth-child(odd){background:var(--pstripe)}
-  #printArea .box{border:2px solid var(--mag-line);border-radius:10px;padding:4px 6px 6px;break-inside:avoid}
-  #printArea h3{margin:0 0 4px;font-size:22px;background:var(--mag);color:var(--ink);border-radius:6px;padding:2px}
-  #printArea .pg{display:grid;grid-template-columns:repeat(3,1fr);gap:.22in;break-after:page}
-  #printArea .pg:last-child{break-after:auto}
-  #printArea .one .box{max-width:5in;margin:0 auto;border:0;padding:0}
-  #printArea .one h3{font-size:34px;margin-bottom:6px}
-  #printArea .one table{font-size:40px;line-height:1.22}
-  #chartView h2{font-size:28px;margin:0 0 8px;background:var(--mag);color:var(--ink)}
-  #grid{font-size:24px}
-  #grid td,#grid th{border:1px solid #9aa8b5;width:52px;height:50px}
+  #printArea tr:nth-child(3n):not(:last-child) td{border-bottom:4px solid var(--chunk)}
+  #printArea .box{break-inside:avoid}
+  #printArea h3{margin:0 0 10px;font-size:34px;color:var(--ink);border-radius:10px;padding:6px 4px}
+  /* Each table has its own color: header plus matching row stripes, so his eyes can find it.
+     1s, 4s, 7s, 10s = pink   2s, 5s, 8s, 11s = blue   3s, 6s, 9s, 12s = green */
+  #printArea .c1 h3{background:#F6B8E6;border:3px solid #C25CA6} #printArea .c1 tr:nth-child(odd){background:#F9D2EE}
+  #printArea .c2 h3{background:#B7D9F7;border:3px solid #4A8CC9} #printArea .c2 tr:nth-child(odd){background:#CFE3F7}
+  #printArea .c3 h3{background:#B5E8C1;border:3px solid #4FAE68} #printArea .c3 tr:nth-child(odd){background:#CDEFD6}
+  /* All 12: 3 tables side by side with wide white gaps, 4 pages */
+  /* Each printed page is a "sheet": content at the top, page number at the bottom */
+  #printArea .sheet{height:10in;display:flex;flex-direction:column;break-after:page;break-inside:avoid}
+  #printArea .sheet:last-child{break-after:auto}
+  #printArea .pfoot{margin-top:auto;font-size:18px;color:var(--ink);text-align:center}
+  #printArea .pg{display:grid;grid-template-columns:repeat(3,1fr);gap:.7in}
+  #printArea .pg table{width:100%;font-size:27px;line-height:2.5}   /* narrow columns, tall roomy rows */
+  #printArea .pg h3{font-size:30px}
+  #printArea .pg td.c{width:100%}   /* extra width goes after the answer, so each fact stays tight */
+  /* One table per page, portrait, as big as it fits */
+  #printArea .one .box{display:table;margin:0 auto}
+  #printArea .one h3{font-size:46px;margin-bottom:12px}
+  #printArea .one table{font-size:46px;line-height:1.4}
+
+  /* --- Printed grid: bigger cells, chunk lines every 3 rows and columns --- */
+  #chartView h2{font-size:22px;margin:0 0 4px;padding:2px 18px;background:#DCE4EC;border-color:#A9BACB;color:var(--ink)}
+  #grid{font-size:26px}
+  #grid{border:3px solid var(--chunk)}
+  #grid td,#grid th{border:0;width:54px;height:68px}   /* no thin lines: they crowd the numbers */   /* portrait: narrower cells, taller rows */
+  #grid tr:first-child > *{border-bottom:3px solid var(--chunk)}
+  #grid tr > :first-child{border-right:3px solid var(--chunk)}
+  #grid tr:nth-child(3n+1):not(:first-child):not(:last-child) > *{border-bottom:5px solid var(--chunk)}
+  #grid tr > :nth-child(3n+1):not(:first-child):not(:last-child){border-right:5px solid var(--chunk)}
   #grid td.on,#grid td.hit{color:var(--ink)!important;font-weight:normal}
-  #grid tr:nth-child(odd) td{background:var(--pstripe)!important}
-  #grid tr:nth-child(even) td{background:#fff!important}
-  #grid tr td.sq{background:var(--psq)!important;font-weight:bold}
-  #grid th.on{background:var(--mag)!important;color:var(--ink)}
+  #grid tr:nth-child(n) td{background:#fff!important}             /* rows 1, 3, 5... white (squares too) */
+  #grid tr:nth-child(6n+3) td{background:#CFE3F7!important}          /* rows 2, 8   blue   */
+  #grid tr:nth-child(6n+5) td{background:#CDEFD6!important}          /* rows 4, 10  green  */
+  #grid tr:nth-child(6n+1):not(:first-child) td{background:#FFEEA0!important}  /* rows 6, 12 yellow */
+  /* square numbers (1, 4, 9 ... 144): same color as their row, just bold */
+  #grid tr:nth-child(n) td.sq{font-weight:bold}
+  /* row labels on the left take their row's color, so each color lane starts at its number */
+  #grid tr:nth-child(n+2) th{background:#fff!important}
+  #grid tr:nth-child(6n+3) th{background:#CFE3F7!important}
+  #grid tr:nth-child(6n+5) th{background:#CDEFD6!important}
+  #grid tr:nth-child(6n+1):not(:first-child) th{background:#FFEEA0!important}
+  #grid th.on{background:#DCE4EC!important;color:var(--ink)}
+  /* top row and the corner: calm neutral instead of pink */
+  #grid tr:first-child th{background:#DCE4EC!important}
   #grid td.hit{outline:0}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
+<style id="pageSize">@page{size:landscape;margin:.4in}</style>
 </head>
 <body>
 <h1>3rd Grade Math Practice</h1>
@@ -175,7 +207,8 @@ button:active{transform:scale(.96)}
 <div id="printMenu" class="menu" hidden>
   <div class="secthead">🖨 Print study sheets</div>
   <button class="say" onclick="readMenu('print')" aria-label="Read the choices to me">🔊</button>
-  <button class="card" onclick="printLists('all')"><span class="ic">📄</span><b>All 12 tables</b></button>
+  <button class="card" onclick="printLists('all')"><span class="ic">📄</span><b>All 12 tables · 4 pages</b></button>
+  <button class="card" onclick="printLists('each')"><span class="ic">📚</span><b>All 12, one per page · 12 pages</b></button>
   <div class="sect">
     <b>One table, big</b>
     <div id="printPick" class="picks"></div>
@@ -275,7 +308,8 @@ function readMenu(which){
          'Practice one table: pick a number. ' +
          'Practice all tables, mixed: questions from the ones to the twelves, mixed up. ' +
          'Print study sheets: paper copies to study.',
-    print: 'All 12 tables: two pages, six tables on each. ' +
+    print: 'All 12 tables: four pages, three tables on each. ' +
+           'All 12, one per page: twelve pages, one big table on each. ' +
            'One table, big: pick a number to print it on its own page. ' +
            'Times table grid: the whole chart on one page.',
     div: 'Division groups: tap the groups to count them. ' +
@@ -560,24 +594,33 @@ function stopRead(){
 }
 
 // ---- Printing ----
-function box(n){ return `<div class="box"><h3>The ${n}s</h3><table>${rows(n)}</table></div>`; }
+function box(n){ return `<div class="box c${(n - 1) % 3 + 1}"><h3>The ${n}s</h3><table>${rows(n)}</table></div>`; }
+function setPage(o, side = '.4in'){ $('pageSize').textContent = `@page{size:${o};margin:.4in ${side}}`; }
 function printLists(which){
   stopRead();
   let h = '';
   if (which === 'one') h = `<div class="one">${box(curT)}</div>`;
   else {
-    // 6 tables per page (2 pages) keeps the print big enough to track
-    for (let pg = 0; pg < 2; pg++){
-      h += '<div class="pg">';
-      for (let n = pg*6 + 1; n <= pg*6 + 6; n++) h += box(n);
-      h += '</div>';
+    const foot = (p, of) => `<div class="pfoot">Page ${p} of ${of}</div>`;
+    if (which === 'each'){
+      // every table on its own page (12 pages)
+      for (let n = 1; n <= 12; n++) h += `<div class="sheet"><div class="one">${box(n)}</div>${foot(n, 12)}</div>`;
+    } else {
+      // 3 tables side by side per page (4 pages): big enough to track easily
+      for (let pg = 0; pg < 4; pg++){
+        h += '<div class="sheet"><div class="pg">';
+        for (let n = pg*3 + 1; n <= pg*3 + 3; n++) h += box(n);
+        h += `</div>${foot(pg + 1, 4)}</div>`;
+      }
     }
   }
   $('printArea').innerHTML = h;
+  setPage('portrait');  // table sheets print tall
   document.body.dataset.print = 'lists';
   window.print();
 }
 function printGrid(){
+  setPage('portrait', '.3in');  // slimmer side margins so the grid can be wider
   document.body.dataset.print = 'grid';
   window.print();
 }
