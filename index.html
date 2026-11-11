@@ -61,6 +61,8 @@ button:active{transform:scale(.96)}
 #pad button{width:90px;height:72px;font-size:34px;padding:0}
 #msg{font-size:26px;min-height:70px;margin:8px;line-height:1.5}
 #stars{font-size:32px}
+#sayRow{display:flex;justify-content:center;align-items:center;gap:10px}
+#soundBtn{font-size:18px;padding:10px 14px}
 
 /* Fact family triangle: 3 big numbers close together */
 .tri{position:relative;width:260px;height:210px;margin:6px auto}
@@ -264,12 +266,14 @@ button:active{transform:scale(.96)}
   <div id="modeName"></div>
   <div id="stars"></div>
   <div id="q"></div>
-  <button class="say" id="sayBtn" onclick="say(true)" aria-label="Read it to me">🔊</button>
+  <div id="sayRow">
+    <button class="say" id="sayBtn" onclick="say(true)" aria-label="Read it to me">🔊</button>
+    <button class="soft" id="soundBtn" onclick="toggleSound()"></button>
+  </div>
   <div id="dots"></div>
   <div id="entry"></div>
   <div id="pad"></div>
   <div id="msg"></div>
-  <button class="soft" id="soundBtn" onclick="toggleSound()"></button>
 
 </div>
 
@@ -319,11 +323,11 @@ function next(){
   if (got >= TOTAL){
     $('q').textContent = '🎉 You did it!';
     $('dots').innerHTML = '';
-    $('entry').hidden = true; $('pad').hidden = true; $('sayBtn').hidden = true;
+    $('entry').hidden = true; $('pad').hidden = true; $('sayRow').hidden = true;
     speak('You did it! Great job!');
     return;
   }
-  $('entry').hidden = mode === 'fam'; $('pad').hidden = false; $('sayBtn').hidden = false;  // in fact families the answer shows inside the ? circle
+  $('entry').hidden = mode === 'fam'; $('pad').hidden = false; $('sayRow').hidden = false;  // in fact families the answer shows inside the ? circle
   cur = queue.shift() || pickMix();
   const [a, b] = cur;
   $('dots').innerHTML = '';
@@ -352,7 +356,7 @@ function next(){
 
 // Sound on/off for the practice screens, remembered on this device.
 let muted = load('mute', false);
-function showSound(){ $('soundBtn').textContent = muted ? '🔇 Sound off' : '🔊 Sound on'; }
+function showSound(){ $('soundBtn').textContent = muted ? 'Sound off' : 'Sound on'; }   // words only, so it doesn't look like the speaker
 function toggleSound(){
   muted = !muted; store('mute', muted); showSound();
   if (muted && window.speechSynthesis) speechSynthesis.cancel();
