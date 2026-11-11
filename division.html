@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Holden's Division Lab</title>
+<title>Division Lab · 3rd Grade Math Practice</title>
 <script src="voice.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -119,7 +119,7 @@ main{padding-top:6px}
 <body>
 <header><div class="wrap hd">
   <button class="icon-btn" id="homeBtn" aria-label="Home">🏠</button>
-  <div class="brand">Holden's Division Lab</div>
+  <div class="brand">3rd Grade Math Practice</div>
   <button class="icon-btn" id="setBtn" aria-label="Settings">⚙️</button>
 </div></header>
 <main id="view" class="wrap"></main>
@@ -382,7 +382,7 @@ class Scene{
   /* bring the picture fully into view before anything moves (one scroll, never during a move) */
   async focus(){const b=this.stage.getBoundingClientRect().bottom;
     if(b>window.innerHeight-ASKBAR+20){window.scrollTo({top:this.anchor.getBoundingClientRect().top+window.scrollY-8,behavior:S.calm?'auto':'smooth'});await sleep(S.calm?50:500);}}
-  /* pacing: Holden taps Next between moves, or taps Play */
+  /* pacing: tap Next between moves, or tap Play */
   async beat(){const hang=()=>new Promise(()=>{});if(this.dead)return hang();
     if(this.first){this.first=false;return;}
     if(this.auto){await sleep(gapMs());if(this.dead)return hang();if(this.auto)return;}
@@ -493,7 +493,7 @@ function barAsk(q,answer,onRight,doHelp){
 
 /* ---------- screens ---------- */
 function home(){kill();setBar('');
-  view(`<h1 class="h">Hi Holden!</h1>
+  view(`<h1 class="h">Division Lab</h1>
   <button class="tile" id="t1"><span class="em">👀</span><span><span class="t">See division</span><span class="d">Watch things split into equal groups</span></span></button>
   <button class="tile" id="t2"><span class="em">📖</span><span><span class="t">Story problems</span><span class="d">Solve them one step at a time</span></span></button>
   <a class="tile" href="index.html#div" style="text-decoration:none;color:inherit"><span class="em">⬅</span><span><span class="t">Back</span><span class="d">Division Practice</span></span></a>

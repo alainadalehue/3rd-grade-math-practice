@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Holden's Math</title>
+<title>3rd Grade Math Practice</title>
 <script src="voice.js"></script>
 <style>
 /* ---------- Colors ----------
@@ -17,6 +17,7 @@
   --go:#BDEFC8; --go-line:#4FAE68;          /* check key, correct answers */
   --calm:#DCE4EC; --calm-line:#A9BACB;      /* back, erase, speaker */
   --hl:#FFE89A;                             /* yellow "you are here" highlight */
+  --pstripe:#CFE3F7; --psq:#F6C6E8;        /* brighter stripes and squares for paper, which prints lighter */
   --acc:var(--calm); --acc-line:var(--calm-line); --acc-pale:var(--stripe);
 }
 body[data-side="mul"]{--acc:var(--mag);--acc-line:var(--mag-line);--acc-pale:var(--mag-pale)}
@@ -124,7 +125,7 @@ button:active{transform:scale(.96)}
   #printArea td:last-child{padding-right:.8em}
   #printArea td.n{text-align:right}
   #printArea td.c{text-align:left;font-weight:bold;min-width:2.2em}
-  #printArea tr:nth-child(odd){background:var(--stripe)}
+  #printArea tr:nth-child(odd){background:var(--pstripe)}
   #printArea .box{border:2px solid var(--mag-line);border-radius:10px;padding:4px 6px 6px;break-inside:avoid}
   #printArea h3{margin:0 0 4px;font-size:22px;background:var(--mag);color:var(--ink);border-radius:6px;padding:2px}
   #printArea .pg{display:grid;grid-template-columns:repeat(3,1fr);gap:.22in;break-after:page}
@@ -136,9 +137,9 @@ button:active{transform:scale(.96)}
   #grid{font-size:24px}
   #grid td,#grid th{border:1px solid #9aa8b5;width:52px;height:50px}
   #grid td.on,#grid td.hit{color:var(--ink)!important;font-weight:normal}
-  #grid tr:nth-child(odd) td{background:var(--stripe)!important}
+  #grid tr:nth-child(odd) td{background:var(--pstripe)!important}
   #grid tr:nth-child(even) td{background:#fff!important}
-  #grid tr td.sq{background:var(--mag-pale)!important;font-weight:bold}
+  #grid tr td.sq{background:var(--psq)!important;font-weight:bold}
   #grid th.on{background:var(--mag)!important;color:var(--ink)}
   #grid td.hit{outline:0}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -146,7 +147,7 @@ button:active{transform:scale(.96)}
 </style>
 </head>
 <body>
-<h1>Holden's Math</h1>
+<h1>3rd Grade Math Practice</h1>
 <div id="streak"></div>
 
 <!-- Home: just two doors -->
@@ -204,7 +205,8 @@ button:active{transform:scale(.96)}
     <div id="pickL" class="noprint"></div>
     <table id="list"></table>
     <div class="noprint">
-      <button class="big" id="readBtn" onclick="readAll()">▶ Read it to me</button>
+      <button class="big" id="readBtn" onclick="readAll()">▶ Read it to me</button><br>
+      <button id="countBtn" onclick="readCount()">🔢 Count by 1s</button>
     </div>
   </div>
 
@@ -292,7 +294,7 @@ function next(){
     $('q').textContent = '🎉 You did it!';
     $('dots').innerHTML = '';
     $('entry').hidden = true; $('pad').hidden = true;
-    speak('You did it! Great job Holden!');
+    speak('You did it! Great job!');
     streak();
     return;
   }
@@ -489,7 +491,7 @@ function tab(t){
 }
 
 // ---- Lists: one table at a time, like the old printed pages ----
-let curT = 1, reading = false, readTimer = null;
+let curT = 1, reading = false, readTimer = null, readMode = 'facts';  // 'facts' = 7 times 1 is 7, 'count' = 7, 14, 21
 for (let n = 1; n <= 12; n++) $('pickL').innerHTML += `<button data-n="${n}" onclick="showList(${n})">${n}s</button>`;
 
 function rows(n){
@@ -502,6 +504,7 @@ function rows(n){
 function showList(n){
   stopRead();
   curT = n;
+  $('countBtn').textContent = `🔢 Count by ${n}s`;  // label follows the table he picked
   $('list').innerHTML = rows(n);
   document.querySelectorAll('#pickL button').forEach(b => b.classList.toggle('sel', +b.dataset.n === n));
 }
@@ -519,23 +522,29 @@ $('list').addEventListener('click', e => {
 });
 
 // Reads the table top to bottom, moving the yellow line along with the voice.
-function readAll(){
-  if (reading){ stopRead(); return; }
+function readAll(){ startRead('facts'); }
+// Skip counting: just the answers (7, 14, 21 ... 84), highlight moving down with the voice.
+function readCount(){ startRead('count'); }
+function startRead(m){
+  const same = reading && readMode === m;
+  stopRead();
+  if (same) return;                 // tapping the same button again stops it
+  readMode = m;
   reading = true;
-  $('readBtn').textContent = '■ Stop';
+  $(m === 'count' ? 'countBtn' : 'readBtn').textContent = '■ Stop';
   step(1);
 }
 function step(i){
   if (!reading) return;
   if (i > 12){ stopRead(); return; }
   setLine(i);
-  const t = `${curT} times ${i} is ${curT*i}`;
+  const t = readMode === 'count' ? String(curT * i) : `${curT} times ${i} is ${curT*i}`;
   if (window.speechSynthesis){
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(t);
     const v = window.bestVoice && bestVoice(); if (v){ u.voice = v; u.lang = v.lang; }
     u.rate = .85;
-    u.onend = () => { readTimer = setTimeout(() => step(i + 1), 400); };
+    u.onend = () => { readTimer = setTimeout(() => step(i + 1), readMode === 'count' ? 300 : 400); };
     speechSynthesis.speak(u);
   } else {
     readTimer = setTimeout(() => step(i + 1), 2200);
@@ -547,6 +556,7 @@ function stopRead(){
   clearTimeout(readTimer);
   if (window.speechSynthesis) speechSynthesis.cancel();
   $('readBtn').textContent = '▶ Read it to me';
+  $('countBtn').textContent = `🔢 Count by ${curT}s`;
 }
 
 // ---- Printing ----
