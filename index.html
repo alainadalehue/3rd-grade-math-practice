@@ -362,14 +362,33 @@ function toggleSound(){
   muted = !muted; store('mute', muted); showSound();
   if (muted && window.speechSynthesis) speechSynthesis.cancel();
 }
-function speak(t, force){
-  if (!window.speechSynthesis) return;
-  if (muted && !force && !$('game').hidden) return;   // muted: no automatic reading during practice
+function canTalk(force){ return !!window.speechSynthesis && !(muted && !force && !$('game').hidden); }
+function speak(t, force, onDone){
+  if (!canTalk(force)) return;   // muted: no automatic reading during practice
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(t);
   const v = window.bestVoice && bestVoice(); if (v){ u.voice = v; u.lang = v.lang; }
   u.rate = .9;
+  if (onDone){ u.onend = onDone; u.onerror = onDone; }
   speechSynthesis.speak(u);
+}
+// Say the feedback, then move on only after the voice has finished
+// (and the message has been up at least minMs), so nothing gets cut off.
+let turn = 0;
+function sayThenNext(t, minMs){
+  const mine = ++turn, start = Date.now();
+  let done = false;
+  const go = () => {
+    if (done || mine !== turn) return;     // left the screen or moved on already
+    done = true; clearTimeout(timer);
+    timer = setTimeout(() => { if (mine === turn) next(); }, Math.max(400, minMs - (Date.now() - start)));
+  };
+  if (canTalk()){
+    speak(t, false, go);
+    timer = setTimeout(go, minMs + t.split(' ').length * 700 + 2000);   // backup if the device never says it finished
+  } else {
+    timer = setTimeout(() => { if (mine === turn) next(); }, minMs);
+  }
 }
 function say(force){
   if (!cur) return;
@@ -424,8 +443,7 @@ function check(){
                 : `${a} × ${b} = ${p}`;
     const heard = shown.replace('×', 'times').replace('÷', 'divided by').replace('=', 'is');
     $('msg').textContent = '✅ Yes! ' + shown;
-    speak('Yes! ' + heard);
-    timer = setTimeout(next, 2200);
+    sayThenNext('Yes! ' + heard, 1800);
   } else {
     misses[id] = (misses[id] || 0) + 2;
     store('hm', misses);
@@ -443,10 +461,9 @@ function check(){
       said = `${a} times ${b} is ${p}`;
     }
     $('msg').textContent = 'Good try! ' + fact;
-    speak(said);
+    sayThenNext(said, mode === "div" || mode === "fam" ? 5000 : 3500);
     // Bring the same fact back a couple of questions later so he has to recall it.
     queue.splice(Math.min(2, queue.length), 0, cur);
-    timer = setTimeout(next, mode === "div" || mode === "fam" ? 5000 : 3500);
   }
 }
 
@@ -463,6 +480,7 @@ function showOnly(id){
   window.scrollTo(0, 0);
 }
 function quiet(){
+  turn++;   // cancels any "move on after speaking"
   clearTimeout(timer);
   stopRead();
   if (window.speechSynthesis) speechSynthesis.cancel();
