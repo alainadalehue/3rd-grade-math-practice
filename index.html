@@ -193,7 +193,6 @@ button:active{transform:scale(.96)}
 
 <!-- Home: just two doors -->
 <div id="doors" class="menu">
-  <button class="say" onclick="readMenu('doors')" aria-label="Read the choices to me">🔊</button>
   <button class="door mul" onclick="openSide('mul')"><span class="sign">×</span>Multiplication<br>Practice</button>
   <button class="door div" onclick="openSide('div')"><span class="sign">÷</span>Division<br>Practice</button>
 </div>
@@ -201,7 +200,6 @@ button:active{transform:scale(.96)}
 <!-- Behind the green door -->
 <div id="mulMenu" class="menu" hidden>
   <div class="secthead"><span class="sign">×</span> Multiplication Practice</div>
-  <button class="say" onclick="readMenu('mul')" aria-label="Read the choices to me">🔊</button>
   <button class="card" onclick="openChart()"><span class="ic">📋</span><b>Look at the tables</b></button>
   <div class="sect">
     <b>Practice one table</b>
@@ -215,7 +213,6 @@ button:active{transform:scale(.96)}
 <!-- Paper copies for studying and the fridge -->
 <div id="printMenu" class="menu" hidden>
   <div class="secthead">🖨 Print study sheets</div>
-  <button class="say" onclick="readMenu('print')" aria-label="Read the choices to me">🔊</button>
   <button class="card" onclick="printLists('all')"><span class="ic">📄</span><b>All 12 tables · 4 pages</b></button>
   <button class="card" onclick="printLists('each')"><span class="ic">📚</span><b>All 12, one per page · 12 pages</b></button>
   <div class="sect">
@@ -229,7 +226,6 @@ button:active{transform:scale(.96)}
 <!-- Behind the orange door -->
 <div id="divMenu" class="menu" hidden>
   <div class="secthead"><span class="sign">÷</span> Division Practice</div>
-  <button class="say" onclick="readMenu('div')" aria-label="Read the choices to me">🔊</button>
   <button class="card" onclick="start('div')"><span class="ic">🟦</span><b>Division groups</b></button>
   <button class="card" onclick="start('fam')"><span class="ic">🔺</span><b>Fact families</b></button>
   <button class="card" onclick="location.href='division.html'"><span class="ic">👀</span><b>Division Lab</b></button>
@@ -308,23 +304,6 @@ function start(m){
   side = (m === 'div' || m === 'fam') ? 'div' : 'mul';
   showOnly('game');
   next();
-}
-
-function readMenu(which){
-  speak({
-    doors: 'Multiplication practice, the green button. Division practice, the orange button.',
-    mul: 'Look at the tables: no quiz, just look and listen. ' +
-         'Practice one table: pick a number. ' +
-         'Practice all tables, mixed: questions from the ones to the twelves, mixed up. ' +
-         'Print study sheets: paper copies to study.',
-    print: 'All 12 tables: four pages, three tables on each. ' +
-           'All 12, one per page: twelve pages, one big table on each. ' +
-           'One table, big: pick a number to print it on its own page. ' +
-           'Times table grid: the whole chart on one page.',
-    div: 'Division groups: tap the groups to count them. ' +
-         'Fact families: three numbers that go together. Find the missing one. ' +
-         'Division Lab: watch division happen, then solve story problems.'
-  }[which]);
 }
 
 function stars(){ $('stars').textContent = '⭐'.repeat(got) + '☆'.repeat(Math.max(0, TOTAL - got)); }
