@@ -84,14 +84,22 @@ button:active{transform:scale(.96)}
 #fact{font-size:40px;font-weight:bold;min-height:56px;margin:6px}
 #wrap{overflow-x:auto;margin:0 auto;max-width:100%}
 #grid{border-collapse:collapse;margin:0 auto;font-size:clamp(14px,3.6vw,24px)}
-#grid td,#grid th{width:2.1em;height:2.1em;text-align:center;border:1px solid var(--line);cursor:pointer;padding:0}
-#grid th{background:var(--mag);color:var(--ink)}
-#grid tr:nth-child(odd) td{background:var(--stripe)}
-#grid tr:nth-child(even) td{background:var(--surface)}
-#grid td.sq{background:var(--mag-pale)!important;font-weight:bold}
-#grid td.on,#grid th.on{background:var(--hl)!important;color:var(--ink)}
-#grid td.hit{background:var(--mag)!important;color:var(--ink);font-weight:bold;outline:3px solid var(--mag-line)}
-/* fade everything except the chosen row/column, so his eyes have less to sort through */
+/* Same design as the printed grid: color lanes, neutral top row, only bold lines every 3 */
+#grid{border:3px solid var(--chunk)}
+#grid td,#grid th{width:2.1em;height:2.1em;text-align:center;border:0;cursor:pointer;padding:0}
+#grid th{font-weight:bold}
+#grid tr:nth-child(n) > *{background:#fff}                       /* rows 1, 3, 5... white */
+#grid tr:nth-child(6n+3) > *{background:#CFE3F7}                  /* rows 2, 8   blue   */
+#grid tr:nth-child(6n+5) > *{background:#CDEFD6}                  /* rows 4, 10  green  */
+#grid tr:nth-child(6n+1):not(:first-child) > *{background:#FFEEA0} /* rows 6, 12  yellow */
+#grid tr:first-child > *{background:#DCE4EC;border-bottom:3px solid var(--chunk)}  /* top row: neutral */
+#grid tr > :first-child{border-right:3px solid var(--chunk)}
+#grid tr:nth-child(3n+1):not(:first-child):not(:last-child) > *{border-bottom:4px solid var(--chunk)}
+#grid tr > :nth-child(3n+1):not(:first-child):not(:last-child){border-right:4px solid var(--chunk)}
+#grid td.sq{font-weight:bold}
+/* tapping: the chosen row and column keep their colors, the rest fades, the answer is circled */
+#grid tr:nth-child(n) th.on{outline:3px solid var(--ink);outline-offset:-3px}
+#grid tr:nth-child(n) td.hit{background:var(--mag);font-weight:bold;outline:3px solid var(--ink);outline-offset:-3px}
 #grid.focusing td:not(.on){opacity:.25}
 
 /* Toggle buttons: outlined = off, filled pastel = on */
@@ -173,7 +181,9 @@ button:active{transform:scale(.96)}
   #grid th.on{background:#DCE4EC!important;color:var(--ink)}
   /* top row and the corner: calm neutral instead of pink */
   #grid tr:first-child th{background:#DCE4EC!important}
-  #grid td.hit{outline:0}
+  #grid tr:nth-child(n) td.hit,#grid tr:nth-child(n) th.on{outline:0}   /* taps don't print */
+  #grid tr:nth-child(n) td.hit{font-weight:normal}
+  #grid tr:nth-child(n) td.sq.hit{font-weight:bold}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
