@@ -92,6 +92,7 @@ button:active{transform:scale(.96)}
 #grid td.hit{background:var(--mag)!important;color:var(--ink);font-weight:bold;outline:3px solid var(--mag-line)}
 /* fade everything except the chosen row/column, so his eyes have less to sort through */
 #grid.focusing td:not(.on){opacity:.25}
+#grid .pe{display:none}
 
 /* Toggle buttons: outlined = off, filled pastel = on */
 .tabs button,#pickL button{background:var(--surface);color:var(--ink);border:3px solid var(--line);font-weight:normal}
@@ -110,7 +111,7 @@ button:active{transform:scale(.96)}
 #printArea{display:none}
 
 @media print{
-  @page{size:landscape;margin:.4in}
+  @page{size:letter landscape;margin:.35in}
   body{background:#fff;padding:0}
   h1,#streak,.menu,#game,.noprint{display:none!important}
   body[data-print="grid"] #chartView{display:block!important}
@@ -133,15 +134,31 @@ button:active{transform:scale(.96)}
   #printArea .one .box{max-width:5in;margin:0 auto;border:0;padding:0}
   #printArea .one h3{font-size:34px;margin-bottom:6px}
   #printArea .one table{font-size:40px;line-height:1.22}
-  #chartView h2{font-size:28px;margin:0 0 8px;background:var(--mag);color:var(--ink)}
-  #grid{font-size:24px}
-  #grid td,#grid th{border:1px solid #9aa8b5;width:52px;height:50px}
-  #grid td.on,#grid td.hit{color:var(--ink)!important;font-weight:normal}
-  #grid tr:nth-child(odd) td{background:var(--pstripe)!important}
-  #grid tr:nth-child(even) td{background:#fff!important}
-  #grid tr td.sq{background:var(--psq)!important;font-weight:bold}
-  #grid th.on{background:var(--mag)!important;color:var(--ink)}
-  #grid td.hit{outline:0}
+  #chartView h2{background:var(--mag);color:var(--ink)}
+  /* Paper grid: fills a landscape page. One pastel color per row, numbers on all four edges,
+     and a thicker line every 3 columns and every 3 rows so his eyes have places to rest. */
+  #chartView h2{font-size:24px;margin:0 0 6px;padding:2px 22px}
+  #wrap{overflow:visible}
+  #grid{font-size:28px;width:100%;table-layout:fixed;border-collapse:collapse;letter-spacing:.02em}
+  #grid .pe{display:table-cell}
+  #grid tr.pe{display:table-row}
+  #grid td,#grid th{width:auto;height:47px;border:1px solid #8E9CAD;color:var(--ink);font-weight:normal;opacity:1}
+  #grid th{font-weight:bold;background:#fff!important}
+  #grid tr.edgeRow th{background:#EEF2F6!important}
+  #grid tr.b0 td,#grid tr.b0 th{background:#F9C6DE!important}
+  #grid tr.b1 td,#grid tr.b1 th{background:#FFD5AE!important}
+  #grid tr.b2 td,#grid tr.b2 th{background:#FFF09E!important}
+  #grid tr.b3 td,#grid tr.b3 th{background:#C9EFB6!important}
+  #grid tr.b4 td,#grid tr.b4 th{background:#BCE0F8!important}
+  #grid tr.b5 td,#grid tr.b5 th{background:#DDCDF8!important}
+  #grid tr > :first-child,#grid tr > :nth-child(4),#grid tr > :nth-child(7),#grid tr > :nth-child(10),#grid tr > :nth-child(13){border-right:3px solid var(--ink)}
+  #grid tr:first-child > *,#grid tr:nth-child(4) > *,#grid tr:nth-child(7) > *,#grid tr:nth-child(10) > *,#grid tr:nth-child(13) > *{border-bottom:3px solid var(--ink)}
+  #grid tr > :first-child,#grid tr > :last-child{border-left:3px solid var(--ink)}
+  #grid tr:first-child > *{border-top:3px solid var(--ink)}
+  #grid tr:last-child > *{border-bottom:3px solid var(--ink)}
+  #grid td.sq{font-weight:bold;outline:3px solid var(--ink);outline-offset:-5px}
+  #grid td.on,#grid td.hit,#grid th.on{color:var(--ink)!important;outline:0}
+  #grid td.sq.on,#grid td.sq.hit{outline:3px solid var(--ink)}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -437,14 +454,20 @@ if (location.hash === '#div') openSide('div');
 // ---- Chart: tap a row and a column to light them up ----
 let selR = 0, selC = 0;
 (function buildChart(){
-  let h = '<tr><th>×</th>';
+  // Paper copy only: each row gets its own pastel color, and the numbers 1-12
+  // repeat on the right side and along the bottom, so he can start from
+  // whichever edge is closest instead of tracking all the way across.
+  let h = '<tr class="edgeRow"><th>×</th>';
   for (let c = 1; c <= 12; c++) h += `<th data-c="${c}">${c}</th>`;
-  h += '</tr>';
+  h += '<th class="pe">×</th></tr>';
   for (let r = 1; r <= 12; r++){
-    h += `<tr><th data-r="${r}">${r}</th>`;
+    h += `<tr class="band b${(r - 1) % 6}"><th data-r="${r}">${r}</th>`;
     for (let c = 1; c <= 12; c++) h += `<td data-r="${r}" data-c="${c}"${r === c ? ' class="sq"' : ''}>${r*c}</td>`;
-    h += '</tr>';
+    h += `<th class="pe">${r}</th></tr>`;
   }
+  h += '<tr class="pe edgeRow"><th>×</th>';
+  for (let c = 1; c <= 12; c++) h += `<th>${c}</th>`;
+  h += '<th>×</th></tr>';
   $('grid').innerHTML = h;
   $('grid').addEventListener('click', e => {
     const el = e.target.closest('td,th'); if (!el) return;
