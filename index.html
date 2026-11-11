@@ -24,22 +24,21 @@ body[data-side="mul"]{--acc:var(--mag);--acc-line:var(--mag-line);--acc-pale:var
 body[data-side="div"]{--acc:var(--teal);--acc-line:var(--teal-line);--acc-pale:var(--teal-pale)}
 
 body{font-family:Verdana,Tahoma,sans-serif;background:var(--bg);color:var(--ink);text-align:center;margin:0;padding:12px;letter-spacing:.05em}
-h1{font-size:28px;margin:6px}
+h1{font-size:18px;font-weight:normal;color:#4A5873;margin:4px 0 2px}   /* app name: small, quiet */
 button{font-family:inherit;font-size:24px;margin:5px;padding:14px 18px;border:3px solid var(--acc-line);border-radius:14px;background:var(--acc);color:var(--ink);font-weight:bold;min-width:64px;cursor:pointer;touch-action:manipulation}
 button:active{transform:scale(.96)}
 .big{background:var(--go);border-color:var(--go-line)}
 .soft{background:var(--calm);border-color:var(--calm-line)}
-#streak{font-size:22px;margin-bottom:6px}
 #q{font-size:clamp(44px,13vw,60px);margin:10px;font-weight:bold}
 /* Page and activity titles are plain bold text, so they never look like buttons */
-#modeName{font-size:22px;font-weight:bold;color:var(--ink);margin:4px 0}
+#modeName{font-size:30px;font-weight:bold;color:var(--ink);margin:6px 0}
 
 /* Menus: one column */
 .menu{max-width:520px;margin:0 auto}
 .door{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;min-height:140px;margin:16px 0;font-size:30px;line-height:1.25;border-radius:22px;text-align:left;color:var(--ink)}
 .door.mul{background:var(--mag);border:4px solid var(--mag-line)}
 .door.div{background:var(--teal);border:4px solid var(--teal-line)}
-.secthead{font-size:28px;font-weight:bold;color:var(--ink);margin:10px 0 4px}
+.secthead{font-size:34px;font-weight:bold;color:var(--ink);margin:6px 0 6px;line-height:1.25}   /* page title: the big one */
 .card{display:flex;align-items:center;gap:14px;width:100%;margin:10px 0;padding:14px 16px;background:var(--surface);color:var(--ink);border:3px solid var(--acc-line);text-align:left;font-weight:normal}
 .card .ic{font-size:38px;flex:none}
 .card b,.sect b{display:block;font-size:24px}
@@ -80,7 +79,7 @@ button:active{transform:scale(.96)}
 .hint{color:var(--ink)}
 
 /* Chart */
-#chartView h2{font-size:28px;margin:8px 0 6px;color:var(--ink)}
+#chartView h2{font-size:34px;margin:6px 0 6px;color:var(--ink)}
 #fact{font-size:40px;font-weight:bold;min-height:56px;margin:6px}
 #wrap{overflow-x:auto;margin:0 auto;max-width:100%}
 #grid{border-collapse:collapse;margin:0 auto;font-size:clamp(14px,3.6vw,24px)}
@@ -120,7 +119,7 @@ button:active{transform:scale(.96)}
 
 @media print{
   body{background:#fff;padding:0}
-  h1,#streak,.menu,#game,.noprint{display:none!important}
+  h1,.menu,#game,.noprint{display:none!important}
   body[data-print="grid"] #chartView{display:block!important}
   body[data-print="grid"] #listsPane{display:none!important}
   body[data-print="grid"] #gridPane{display:block!important}
@@ -191,7 +190,6 @@ button:active{transform:scale(.96)}
 </head>
 <body>
 <h1>3rd Grade Math Practice</h1>
-<div id="streak"></div>
 
 <!-- Home: just two doors -->
 <div id="doors" class="menu">
@@ -340,7 +338,6 @@ function next(){
     $('dots').innerHTML = '';
     $('entry').hidden = true; $('pad').hidden = true;
     speak('You did it! Great job!');
-    streak();
     return;
   }
   $('entry').hidden = mode === 'fam'; $('pad').hidden = false;  // in fact families the answer shows inside the ? circle
@@ -451,13 +448,6 @@ function check(){
   }
 }
 
-function streak(){
-  const d = new Date().toDateString(), y = new Date(Date.now() - 864e5).toDateString();
-  const s = load('hs', {n:0, d:''});
-  if (s.d !== d){ s.n = s.d === y ? s.n + 1 : 1; s.d = d; store('hs', s); }
-  show();
-}
-function show(){ const n = load('hs', {n:0}).n; $('streak').textContent = '🔥 Streak: ' + n + (n === 1 ? ' day' : ' days'); }
 
 // ---- Screens ----
 let side = '';  // 'mul' (green) or 'div' (orange)
@@ -474,8 +464,8 @@ function quiet(){
 function openPrint(){ side = 'mul'; showOnly('printMenu'); }
 function printOne(n){ curT = n; printLists('one'); }
 function openSide(s){ side = s; showOnly(s === 'mul' ? 'mulMenu' : 'divMenu'); }
-function home(){ quiet(); side = ''; showOnly('doors'); show(); }
-function goBack(){ quiet(); openSide(side || 'mul'); show(); }
+function home(){ quiet(); side = ''; showOnly('doors'); }
+function goBack(){ quiet(); openSide(side || 'mul'); }
 // division.html links back with #div so he lands on the orange side
 if (location.hash === '#div') openSide('div');
 
@@ -646,7 +636,6 @@ document.addEventListener('keydown', e => {
   e.preventDefault(); // stop Enter from also "clicking" the last tapped button
 });
 
-show();
 </script>
 </body>
 </html>
